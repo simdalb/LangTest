@@ -1,0 +1,83 @@
+
+SPEC
+
+New window:
+"Who are you?"
+"Name:" drop down field, like Google search field
+
+New window:
+"Please choose an option, %s:" name
+Out:
+
+1. Preview / edit / do a test ("Take a test")
+2. Create a test
+3. Delete a test
+4. See user statistics
+
+1. Preview / edit / do a test
+New window:
+"Please choose the test you would like to take:"
+List of available tests, clicking on one takes user to next window.
+Below this, "The highlighted test is the one you should do next."
+
+Highlighted test is based primarily on test with lower score and secondarily on alphabetical sorting.
+
+New window:
+Two fields, showing first item in language A and first item in language B
+Button "Next" that takes user to next item, and button "Edit"
+or "All items previewed, go to beginning of list?"
+
+Button "Back to list of tests"
+Button "Take test", creates popup with options "German to English", "English to German" as radio buttons
+
+New window:
+Name of test
+first field: uneditable, large
+second field: editable, large, return to submit
+"Completed: " number done
+"Correct: " 
+"Total: "
+"Edit previous result" button
+"Abort test" button
+
+When test is finished, popup "You scored: " score, OK button
+"Do test again" button (goes to preview)
+
+2. New window
+"Enter name of test:"
+field, accept button
+Unblocked when accept button clicked and test name accepted:
+Pair fields labelled English then German with persisted swap button in the middle, accept button, "Number of entries: %d" number_of_entries
+Batch import button, creates popup with "Enter filename:" field, German to English, English to German as radio button,
+below "Fields must be separated with a '|'".
+Finish button
+
+4. See user statistics
+New window:
+"Please choose an option:"
+a. "See all tests taken in chronological order"
+b. "Show scores for each test in chronological order"
+
+"Reset statistics for %s" name
+
+CODE DESIGN
+
+class user:
+    name
+    running_score
+    (test, scores) list
+
+class test:
+	name
+	(German, English) list
+	number of pairs
+
+class batch_import:
+    
+	
+DATABASE DESIGN
+
+Table tests: (test ID, testname) list
+Table users: (user ID, username) list
+Tables test: (test ID, German, English) list
+Table user: (user ID, test ID, score, timestamp) list
