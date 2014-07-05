@@ -1,49 +1,52 @@
 
 SPEC
 
-New window:
+New window: Login
 "Who are you?"
 "Name:" drop down field, like Google search field
 
-New window:
+New window: Menu
 "Please choose an option, %s:" name
 Out:
 
 1. Preview / edit / do a test ("Take a test")
 2. Create a test
-3. Delete a test
-4. See user statistics
+3. See user statistics
+
+Button "<< Log in as a different user"
 
 1. Preview / edit / do a test
-New window:
-"Please choose the test you would like to take:"
+New window: Start
+"Please choose a test:"
+Below this, "(The highlighted test is the one you should do next.)"
 List of available tests, clicking on one takes user to next window.
-Below this, "The highlighted test is the one you should do next."
+Button "<< Return to main menu"
 
 Highlighted test is based primarily on test with lower score and secondarily on alphabetical sorting.
 
-New window:
-Two fields, showing first item in language A and first item in language B
-Button "Next" that takes user to next item, and button "Edit"
-or "All items previewed, go to beginning of list?"
+New window: Preview
+Name of test - "Preview"
+"Search for item:", search field for items, search button, drop down results
+"German to English", "English to German" as radio buttons
+"Item number: ", item number.
+Two multi-line editable fields, showing first item in language A and first item in language B
+Below, Button "Preview next item" that takes user to next item, "Previous item" button,
+these buttons are deactivated when no previous or next item.
+When end of list, popup with "All items previewed, go to beginning of list?"
+below, button "Dump all items to text file" - when clicked, a popup with "choose path and filename" appears
+button, "Skip preview >>" and then "<< Back to list of tests"
 
-Button "Back to list of tests"
-Button "Take test", creates popup with options "German to English", "English to German" as radio buttons
-
-New window:
+New window: Test
 Name of test
 first field: uneditable, large
-second field: editable, large, return to submit
+Below, second field: editable, large, return to submit
+Below, "Previous item: ", 2 items, editable, ", button "Save changes"
 "Completed: " number done
 "Correct: " 
 "Total: "
-"Edit previous result" button
-"Abort test" button
+"<< Abort and return to preview" button
 
-When test is finished, popup "You scored: " score, OK button
-"Do test again" button (goes to preview)
-
-2. New window
+2. New window: CreateTest
 "Enter name of test:"
 field, accept button
 Unblocked when accept button clicked and test name accepted:
@@ -52,8 +55,8 @@ Batch import button, creates popup with "Enter filename:" field, German to Engli
 below "Fields must be separated with a '|'".
 Finish button
 
-4. See user statistics
-New window:
+3. See user statistics
+New window: Statistics
 "Please choose an option:"
 a. "See all tests taken in chronological order"
 b. "Show scores for each test in chronological order"
@@ -73,7 +76,7 @@ class test:
 	number of pairs
 
 class batch_import:
-    
+
 	
 DATABASE DESIGN
 
