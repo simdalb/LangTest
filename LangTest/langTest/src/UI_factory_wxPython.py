@@ -6,6 +6,6 @@ class UIFactoryWXPython:
 	def __init__(self):
 		pass
 	
-	def create_login(self):
+	def create_login_UI(self):
 		return login_frame.LoginFrame()
 		

@@ -6,7 +6,7 @@ class Login:
         self.user_manager = user_manager
         
     def start(self):
-        self.login_UI.start()
+        self.login_UI.start(self)
         
     def receive_username(self, user_name):
         user_id = self.user_manager.get_user_id(user_name)
@@ -17,6 +17,12 @@ class Login:
             
     def receive_new_username(self, user_name):
         self.__finish(user_name, self.user_manager.set_new_user(user_name))
+        
+    def receive_partial_text(self, text):
+        textList = []
+        textList.append("abc")
+        textList.append("ade")
+        return textList
         
     def __finish(self, user_name, user_id):
         self.login_UI.close()
