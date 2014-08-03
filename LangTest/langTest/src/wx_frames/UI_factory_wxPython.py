@@ -1,6 +1,5 @@
 
-import wx
-from wx_frames import login_frame
+import login_frame
 
 class UIFactoryWXPython:
 	def __init__(self):

@@ -4,26 +4,17 @@ class Login:
         self.manager = manager
         self.login_UI = login_UI
         self.user_manager = user_manager
-        
-    def start(self):
         self.login_UI.start(self)
-        
-    def receive_username(self, user_name):
+
+    def set_user_name(self, user_name):
         user_id = self.user_manager.get_user_id(user_name)
-        if user_id == 0:
-            self.login_UI.ask_if_new_user(user_name)
-        else:
-            self.__finish(user_name, user_id)
-            
-    def receive_new_username(self, user_name):
-        self.__finish(user_name, self.user_manager.set_new_user(user_name))
+        user_exists = user_id > 0
+        if user_exists:
+            self.manager.do_menu(user_name, user_id)
+        return user_exists
         
     def receive_partial_text(self, text):
-        textList = []
-        textList.append("abc")
-        textList.append("ade")
-        return textList
-        
-    def __finish(self, user_name, user_id):
-        self.login_UI.close()
-        self.manager.do_menu(user_name, user_id)
+        return self.user_manager.get_matches(text)
+    
+    def create_user(self, user_name):
+        self.manager.do_menu(user_name, self.user_manager.create_user(user_name))
