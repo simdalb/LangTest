@@ -3,7 +3,7 @@ import user_manager
 
 class DataFactorySQL:
     def __init__(self, cursor):
-        self.cursor = cursor
+        self.user_manager = user_manager.UserManager(cursor)
     
-    def create_user_manager(self):
-        return user_manager.UserManager(self.cursor)
+    def get_user_manager(self):
+        return self.user_manager

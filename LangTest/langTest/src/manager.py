@@ -3,7 +3,7 @@ from logic import login
 
 class Manager:
     def __init__(self, UI_factory, data_manager):
-        self.login = login.Login(self, UI_factory.create_login_UI(), data_manager.get_data_factory().create_user_manager())
+        self.login = login.Login(self, UI_factory, data_manager.get_data_factory().get_user_manager())
         """
         start = Start(self)
         preview = Preview(self)

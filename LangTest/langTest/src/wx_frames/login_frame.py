@@ -1,23 +1,28 @@
 
 import wx
 
-class CreateUserPopupWindow(wx.PopupWindow):
-    def __init__(self, parent, user_name):
-        super(CreateUserPopupWindow, self).__init__(parent)
+class CreateUserPopupWindow(wx.Frame):
+    def __init__(self, parent):
+        super(CreateUserPopupWindow, self).__init__(parent, size=(300, 160))
+        
+    def start(self, user_name, parent):
         self.parent = parent
         self.user_name = user_name
-        self.panel = wx.Panel(self, -1)
-        self.box = wx.BoxSizer(wx.HORIZONTAL)
-        textctrl_createquery = wx.TextCtrl(self.panel, -1, "Create new user\"" + user_name + "?\"")
-        self.box.Add(textctrl_createquery)
-        button_create = wx.Button(self.panel, -1, 'Create')
+        self.SetBackgroundColour('WHITE')
+        box = wx.BoxSizer(wx.VERTICAL)
+        box.Add(wx.StaticText(self, id=-1, label="\nCreate new user\"" + user_name + "\"?\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        grid_sizer = wx.GridSizer(1, 2, 10, 20)
+        button_create = wx.Button(self, -1, 'Create')
         self.Bind(wx.EVT_BUTTON, self.OnButtonCreateClicked, button_create)
-        self.box.Add(button_create, 1)
-        button_dismiss = wx.Button(self.panel, -1, 'Dismiss')
+        grid_sizer.Add(button_create, 1)
+        button_dismiss = wx.Button(self, -1, 'Dismiss')
         self.Bind(wx.EVT_BUTTON, self.OnButtonDismissClicked, button_dismiss)
-        self.box.Add(button_dismiss, 1)
-        self.panel.SetSizer(self.box)
+        grid_sizer.Add(button_dismiss, 1)
+        box.Add(grid_sizer, flag=wx.CENTER)
+        self.SetSizer(box)
         self.Centre()
+        self.Raise()
+        self.Show()
 
     def OnButtonCreateClicked(self, event):
         self.parent.create_user(self.user_name)
@@ -28,12 +33,11 @@ class CreateUserPopupWindow(wx.PopupWindow):
 
 class LoginFrame(wx.Frame):
     def __init__(self):
-        self.no_ignore_OnTextChange = False
+        super(LoginFrame, self).__init__(None, title="Login, or create an account", size=(200,300))
         
     def start(self, login):
+        self.no_ignore_OnTextChange = False
         self.login = login
-        self.app = wx.App(0)
-        super(LoginFrame, self).__init__(None, title="Login, or create an account", size=(200,300))
         self.panel = wx.Panel(self, -1)
         self.box = wx.BoxSizer(wx.HORIZONTAL)
         self.cb = wx.ComboBox(self.panel, -1, 'User name', size=(100,100), style = wx.CB_SIMPLE | wx.CB_DROPDOWN)
@@ -48,7 +52,6 @@ class LoginFrame(wx.Frame):
         self.panel.SetSizer(self.box)
         self.Centre()
         self.Show()
-        self.app.MainLoop()
 
     def OnTextChanged(self, event):
         if not self.no_ignore_OnTextChange:
@@ -66,8 +69,7 @@ class LoginFrame(wx.Frame):
     def OnButtonLoginClicked(self, event):
         if self.cb.GetValue():
             if not self.login.set_user_name(self.cb.GetValue()):
-                self.create_user_popupwindow = CreateUserPopupWindow(self, self.cb.GetValue())
-                self.create_user_popupwindow.Show()
+                self.login.prompt_new_user(self.cb.GetValue())
             else:
                 self.Close()
                 

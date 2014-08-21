@@ -1,8 +1,9 @@
 
 class Login:
-    def __init__(self, manager, login_UI, user_manager):
+    def __init__(self, manager, UI_factory, user_manager):
         self.manager = manager
-        self.login_UI = login_UI
+        self.UI_factory = UI_factory
+        self.login_UI = UI_factory.create_login_UI()
         self.user_manager = user_manager
         self.login_UI.start(self)
 
@@ -18,3 +19,7 @@ class Login:
     
     def create_user(self, user_name):
         self.manager.do_menu(user_name, self.user_manager.create_user(user_name))
+
+    def prompt_new_user(self, user_name):
+        self.createUserPopupWindow = self.UI_factory.create_CreateUserPopupWindow(self.login_UI)
+        self.createUserPopupWindow.start(user_name, self)
