@@ -1,18 +1,45 @@
 
 import wx
+import logging
+
+class InformUserExistsPopupWindow(wx.Frame):
+    def __init__(self, parent):
+        self.logprefix = "InformUserExistsPopupWindow"
+        super(InformUserExistsPopupWindow, self).__init__(parent, size=(300, 160))
+        
+    def start(self, user_name):
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
+        self.SetBackgroundColour('WHITE')
+        box = wx.BoxSizer(wx.VERTICAL)
+        box.Add(wx.StaticText(self, id=-1, label="\nUser name \"" + user_name + "\" already exists, please choose a different user name\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        button_ok = wx.Button(self, -1, 'OK')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonOKClicked, button_ok)
+        box.Add(button_ok, 1)
+        self.SetSizer(box)
+        self.Centre()
+        self.Raise()
+        self.MakeModal(True)
+        self.Show()
+    
+    def OnButtonOKClicked(self, event):
+        logging.info("{0}:{1}: user clicked OK".format(self.logprefix, "OnButtonOKClicked"))
+        self.MakeModal(False)
+        self.Close()
 
 class CreateUserPopupWindow(wx.Frame):
     def __init__(self, parent):
+        self.logprefix = "CreateUserPopupWindow"
         super(CreateUserPopupWindow, self).__init__(parent, size=(300, 160))
         
     def start(self, user_name, parent):
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.parent = parent
         self.user_name = user_name
         self.SetBackgroundColour('WHITE')
         box = wx.BoxSizer(wx.VERTICAL)
-        box.Add(wx.StaticText(self, id=-1, label="\nCreate new user\"" + user_name + "\"?\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        box.Add(wx.StaticText(self, id=-1, label="\nCreate new user \"" + user_name + "\"?\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         grid_sizer = wx.GridSizer(1, 2, 10, 20)
-        button_create = wx.Button(self, -1, 'Create')
+        button_create = wx.Button(self, -1, 'Create\nand login')
         self.Bind(wx.EVT_BUTTON, self.OnButtonCreateClicked, button_create)
         grid_sizer.Add(button_create, 1)
         button_dismiss = wx.Button(self, -1, 'Dismiss')
@@ -22,60 +49,84 @@ class CreateUserPopupWindow(wx.Frame):
         self.SetSizer(box)
         self.Centre()
         self.Raise()
+        self.MakeModal(True)
         self.Show()
 
     def OnButtonCreateClicked(self, event):
+        logging.info("{0}:{1}: creating user name: {2}".format(self.logprefix, "OnButtonCreateClicked", self.user_name))
+        self.MakeModal(False)
+        self.Hide()
         self.parent.create_user(self.user_name)
         self.Close()
 
     def OnButtonDismissClicked(self, event):
+        logging.info("{0}:{1}: user clicked dismiss".format(self.logprefix, "OnButtonDismissClicked"))
+        self.MakeModal(False)
         self.Close()
 
 class LoginFrame(wx.Frame):
     def __init__(self):
-        super(LoginFrame, self).__init__(None, title="Login, or create an account", size=(200,300))
+        self.logprefix = "LoginFrame"
+        super(LoginFrame, self).__init__(None, title="Language test", size=(300, 300))
         
     def start(self, login):
-        self.no_ignore_OnTextChange = False
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.login = login
-        self.panel = wx.Panel(self, -1)
-        self.box = wx.BoxSizer(wx.HORIZONTAL)
-        self.cb = wx.ComboBox(self.panel, -1, 'User name', size=(100,100), style = wx.CB_SIMPLE | wx.CB_DROPDOWN)
-        self.box.Add(self.cb)
-        self.Bind(wx.EVT_TEXT, self.OnTextChanged, self.cb)
-        button_login = wx.Button(self.panel, -1, 'Login')
-        self.box.Add(button_login, 1)
-        self.Bind(wx.EVT_BUTTON, self.OnButtonLoginClicked, button_login)
-        button_quit = wx.Button(self.panel, -1, 'Quit')
-        self.box.Add(button_quit, 1)
+        self.SetBackgroundColour('WHITE')
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        users = login.get_users()
+        logging.info("{0}:{1}: found {2} users".format(self.logprefix, "start", len(users)))
+        if users:
+            vbox.Add(wx.StaticText(self, label='\nDouble click your user name to login:\n'), flag=wx.CENTER)
+            user_list_box = wx.ListBox(self, choices=users)
+            self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnListItemDClicked, user_list_box)
+            vbox.Add(user_list_box, 1, flag=wx.CENTER)
+            vbox.Add(wx.StaticText(self), 1, flag=wx.CENTER)
+        vbox.Add(wx.StaticText(self, label='\nCreate a new user:\n'), flag=wx.CENTER)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.input_create_user = wx.TextCtrl(self)
+        self.Bind(wx.EVT_TEXT_ENTER, self.OnButtonCreateClicked, self.input_create_user)
+        hbox.Add(self.input_create_user, 1)
+        hbox.AddSpacer(20)
+        button_create = wx.Button(self, -1, 'Create')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonCreateClicked, button_create)
+        hbox.Add(button_create, 1)
+        vbox.Add(hbox, 1, flag=wx.CENTER)
+        vbox.Add(wx.StaticText(self), 1, flag=wx.CENTER)
+        button_quit = wx.Button(self, -1, 'Quit')
         self.Bind(wx.EVT_BUTTON, self.OnButtonQuitClicked, button_quit)
-        self.panel.SetSizer(self.box)
+        grid = wx.GridSizer(1, 3)
+        grid.Add(wx.StaticText(self), flag=wx.CENTER)
+        grid.Add(button_quit, 1, flag=wx.CENTER)
+        vbox.Add(grid, flag=wx.CENTER)
+        vbox.Add(wx.StaticText(self), flag=wx.CENTER)
+        self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
+        
+    def OnListItemDClicked(self, event):
+        logging.info("{0}:{1}: user clicked string: {2}".format(self.logprefix, "OnListItemDClicked", event.GetString()))
+        self.Hide()
+        self.login.set_user_name(event.GetString())
+        self.Close()
 
-    def OnTextChanged(self, event):
-        if not self.no_ignore_OnTextChange:
-            self.text_ctrl = self.cb.GetValue()
-            self.cb.Clear()
-            self.no_ignore_OnTextChange = True
-            self.cb.SetValue(self.text_ctrl)
-            for item in self.login.receive_partial_text(event.GetString()):
-                self.cb.Append(item)
-            self.cb.SetInsertionPointEnd()
-            self.panel.SetSizer(self.box)
-        else:
-            self.no_ignore_OnTextChange = False
-            
-    def OnButtonLoginClicked(self, event):
-        if self.cb.GetValue():
-            if not self.login.set_user_name(self.cb.GetValue()):
-                self.login.prompt_new_user(self.cb.GetValue())
+    def OnButtonCreateClicked(self, event):
+        value = self.input_create_user.GetValue()
+        if value:
+            if not self.login.user_exists(value):
+                logging.info("{0}:{1}: user name: {2} does not exist".format(self.logprefix, "OnButtonCreateClicked", value))
+                self.login.prompt_new_user(value)
             else:
-                self.Close()
+                logging.info("{0}:{1}: user name: {2} exists".format(self.logprefix, "OnButtonCreateClicked", value))
+                self.login.inform_user_exists(value)
                 
     def OnButtonQuitClicked(self, event):
+        logging.info("{0}:{1}: user clicked quit".format(self.logprefix, "OnButtonQuitClicked"))
+        self.Hide()
+        self.login.quit()
         self.Close()
     
-    def create_user(self, user_name):
-        self.login.create_user(user_name)
+    def finish(self):
+        logging.info("{0}:{1}: finish".format(self.logprefix, "finish"))
         self.Close()
+        

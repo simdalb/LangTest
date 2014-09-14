@@ -10,3 +10,6 @@ class UIFactoryWXPython:
 		
 	def create_CreateUserPopupWindow(self, parent):
 		return login_frame.CreateUserPopupWindow(parent)
+	
+	def create_InformUserExistsPopupWindow(self, parent):
+		return login_frame.InformUserExistsPopupWindow(parent)
