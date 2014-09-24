@@ -29,7 +29,7 @@ class InformUserExistsPopupWindow(wx.Frame):
 class CreateUserPopupWindow(wx.Frame):
     def __init__(self, parent):
         self.logprefix = "CreateUserPopupWindow"
-        super(CreateUserPopupWindow, self).__init__(parent, size=(300, 160))
+        super(CreateUserPopupWindow, self).__init__(parent, size=(400, 160))
         
     def start(self, user_name, parent):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
@@ -38,15 +38,19 @@ class CreateUserPopupWindow(wx.Frame):
         self.SetBackgroundColour('WHITE')
         box = wx.BoxSizer(wx.VERTICAL)
         box.Add(wx.StaticText(self, id=-1, label="\nCreate new user \"" + user_name + "\"?\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-        grid_sizer = wx.GridSizer(1, 2, 10, 20)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.AddSpacer(20)
         button_create = wx.Button(self, -1, 'Create\nand login')
         self.Bind(wx.EVT_BUTTON, self.OnButtonCreateClicked, button_create)
-        grid_sizer.Add(button_create, 1)
+        hbox.Add(button_create, 1)
+        hbox.AddSpacer(20)
         button_dismiss = wx.Button(self, -1, 'Dismiss')
         self.Bind(wx.EVT_BUTTON, self.OnButtonDismissClicked, button_dismiss)
-        grid_sizer.Add(button_dismiss, 1)
-        box.Add(grid_sizer, flag=wx.CENTER)
-        self.SetSizer(box)
+        hbox.Add(button_dismiss, 1)
+        hbox.AddSpacer(20)
+        box.Add(hbox, flag=wx.CENTER)
+        box.Add(wx.StaticText(self, style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        self.SetSizerAndFit(box)
         self.Centre()
         self.Raise()
         self.MakeModal(True)

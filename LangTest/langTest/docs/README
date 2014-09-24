@@ -5,11 +5,14 @@ New window: Login
 "Who are you?"
 "Name:" drop down field, like Google search field
 
+
+
+
 New window: Menu
 "Please choose an option, %s:" name
 Out:
 
-1. Preview / edit / do a test ("Take a test")
+1. Preview / edit / do a test ("Go to a test")
 2. Create a test
 3. See user statistics
 
@@ -22,7 +25,8 @@ Below this, "(The highlighted test is the one you should do next.)"
 List of available tests, clicking on one takes user to next window.
 Button "<< Return to main menu"
 
-Highlighted test is based primarily on test with lower score and secondarily on alphabetical sorting.
+Highlighted test is based primarily on test with lowest score, then on how long ago test was taken
+then on alphabetical sorting.
 
 New window: Preview
 Name of test - "Preview"
@@ -82,5 +86,5 @@ DATABASE DESIGN
 
 Table tests: (test ID, testname) list
 Table users: (user ID, username) list
-Tables test: (test ID, German, English) list
-Table user: (user ID, test ID, score, timestamp) list
+Tables test: (test ID, question ID, German, English) list
+Table user: (user ID, test ID, timestamp, score) list

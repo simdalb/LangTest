@@ -4,7 +4,7 @@ import logging
 class Login:
     def __init__(self, manager, UI_factory, user_manager):
         self.logprefix = "Login"
-        logging.info("{0}:{1}: start".format(self.logprefix, "__init__"))
+        logging.info("{0}:{1}:".format(self.logprefix, "__init__"))
         self.manager = manager
         self.UI_factory = UI_factory
         self.login_UI = UI_factory.create_login_UI()
@@ -18,7 +18,7 @@ class Login:
         logging.info("{0}:{1}: user_name: {2} has user_id: {3}".format(self.logprefix, "set_user_name", user_name, user_id))
         user_exists = user_id > 0
         if user_exists:
-            self.manager.do_menu(user_name, user_id)
+            self.manager.do_test_selection(user_name, user_id)
         return user_exists
     
     def get_users(self):
@@ -36,7 +36,8 @@ class Login:
     def create_user(self, user_name):
         logging.info("{0}:{1}: creating user name: {2}".format(self.logprefix, "create_user", user_name))
         self.login_UI.finish()
-        self.manager.do_menu(user_name, self.user_manager.create_user(user_name))
+        user_id = self.user_manager.create_user(user_name)
+        self.manager.do_test_selection(user_name, user_id)
 
     def prompt_new_user(self, user_name):
         logging.info("{0}:{1}: creating user name: {2}".format(self.logprefix, "prompt_new_user", user_name))
