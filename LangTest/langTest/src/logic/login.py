@@ -35,8 +35,8 @@ class Login:
     
     def create_user(self, user_name):
         logging.info("{0}:{1}: creating user name: {2}".format(self.logprefix, "create_user", user_name))
-        self.login_UI.finish()
         user_id = self.user_manager.create_user(user_name)
+        self.login_UI.finish()
         self.manager.do_test_selection(user_name, user_id)
 
     def prompt_new_user(self, user_name):

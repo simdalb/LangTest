@@ -6,22 +6,27 @@ class InformTestExistsPopupWindow(wx.Frame):
     def __init__(self, parent):
         self.logprefix = "InformTestExistsPopupWindow"
         super(InformTestExistsPopupWindow, self).__init__(parent, size=(300, 160))
-        
-    def start(self, test_name):
+
+    def start(self, user_name):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.Bind(wx.EVT_CLOSE, self.when_closed)
         self.SetBackgroundColour('WHITE')
-        box = wx.BoxSizer(wx.VERTICAL)
-        box.Add(wx.StaticText(self, id=-1, label="\nTest name \"" + test_name + "\" already exists, please choose a different test name\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.AddSpacer(30)
+        hbox.Add(wx.StaticText(self, id=-1, label="\nTest \"" + user_name + "\" already exists,\nplease choose a different test name\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        hbox.AddSpacer(30)
+        vbox.Add(hbox)
         button_ok = wx.Button(self, -1, 'OK')
         self.Bind(wx.EVT_BUTTON, self.OnButtonOKClicked, button_ok)
-        box.Add(button_ok, 1)
-        self.SetSizer(box)
+        vbox.Add(button_ok, 1, flag=wx.CENTER)
+        vbox.Add(wx.StaticText(self, style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        self.SetSizerAndFit(vbox)
         self.Centre()
         self.Raise()
         self.MakeModal(True)
         self.Show()
-    
+
     def OnButtonOKClicked(self, event):
         logging.info("{0}:{1}: user clicked OK".format(self.logprefix, "OnButtonOKClicked"))
         self.Unbind(wx.EVT_CLOSE)
@@ -37,23 +42,27 @@ class CreateTestPopupWindow(wx.Frame):
         self.logprefix = "CreateTestPopupWindow"
         super(CreateTestPopupWindow, self).__init__(parent, size=(300, 160))
         
-    def start(self, test_name, parent):
+    def start(self, user_name, parent):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.parent = parent
-        self.test_name = test_name
+        self.user_name = user_name
         self.Bind(wx.EVT_CLOSE, self.when_closed)
         self.SetBackgroundColour('WHITE')
         box = wx.BoxSizer(wx.VERTICAL)
         box.Add(wx.StaticText(self, id=-1, label="\nCreate new test \"" + test_name + "\"?\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-        grid_sizer = wx.GridSizer(1, 2, 10, 20)
-        button_create = wx.Button(self, -1, 'Create')
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.AddSpacer(20)
+        button_create = wx.Button(self, -1, 'Create\nand edit')
         self.Bind(wx.EVT_BUTTON, self.OnButtonCreateClicked, button_create)
-        grid_sizer.Add(button_create, 1)
+        hbox.Add(button_create, 1)
+        hbox.AddSpacer(20)
         button_dismiss = wx.Button(self, -1, 'Dismiss')
         self.Bind(wx.EVT_BUTTON, self.OnButtonDismissClicked, button_dismiss)
-        grid_sizer.Add(button_dismiss, 1)
-        box.Add(grid_sizer, flag=wx.CENTER)
-        self.SetSizer(box)
+        hbox.Add(button_dismiss, 1)
+        hbox.AddSpacer(20)
+        box.Add(hbox, flag=wx.CENTER)
+        box.Add(wx.StaticText(self, style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        self.SetSizerAndFit(box)
         self.Centre()
         self.Raise()
         self.MakeModal(True)
@@ -80,7 +89,7 @@ class TestSelectionFrame(wx.Frame):
     def __init__(self):
         self.logprefix = "TestSelectionFrame"
         super(TestSelectionFrame, self).__init__(None, title="Language test", size=(300, 300))
-        
+
     def start(self, testSelection):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.testSelection = testSelection
@@ -94,7 +103,6 @@ class TestSelectionFrame(wx.Frame):
             test_list_box = wx.ListBox(self, choices=tests)
             self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnListItemDClicked, test_list_box)
             vbox.Add(test_list_box, 1, flag=wx.CENTER)
-            vbox.Add(wx.StaticText(self), 1, flag=wx.CENTER)
         vbox.Add(wx.StaticText(self, label='\nCreate a new test:\n'), flag=wx.CENTER)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.input_create_test = wx.TextCtrl(self)
@@ -104,8 +112,8 @@ class TestSelectionFrame(wx.Frame):
         button_create = wx.Button(self, -1, 'Create')
         self.Bind(wx.EVT_BUTTON, self.OnButtonCreateClicked, button_create)
         hbox.Add(button_create, 1)
-        vbox.Add(hbox, 1, flag=wx.CENTER)
-        vbox.Add(wx.StaticText(self), 1, flag=wx.CENTER)
+        vbox.Add(hbox, flag=wx.CENTER)
+        vbox.AddSpacer(20)
         button_quit = wx.Button(self, -1, 'Quit')
         self.Bind(wx.EVT_BUTTON, self.OnButtonQuitClicked, button_quit)
         button_login = wx.Button(self, -1, '<< Back\nto login')
@@ -121,9 +129,10 @@ class TestSelectionFrame(wx.Frame):
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
-        
+
     def OnListItemDClicked(self, event):
         logging.info("{0}:{1}: user clicked string: {2}".format(self.logprefix, "OnListItemDClicked", event.GetString()))
+        self.Unbind(wx.EVT_CLOSE)
         self.Hide()
         self.testSelection.set_test_name(event.GetString())
         self.Close()
@@ -151,11 +160,13 @@ class TestSelectionFrame(wx.Frame):
 
     def OnButtonLoginClicked(self, event):
         logging.info("{0}:{1}: user clicked back to login".format(self.logprefix, "OnButtonLoginClicked"))
+        self.Unbind(wx.EVT_CLOSE)
         self.Hide()
         self.testSelection.back_to_login()
         self.Close()
     
     def finish(self):
         logging.info("{0}:{1}: finish".format(self.logprefix, "finish"))
+        self.Unbind(wx.EVT_CLOSE)
         self.Close()
         

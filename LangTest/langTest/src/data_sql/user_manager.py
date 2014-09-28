@@ -25,6 +25,7 @@ class UserManager:
         return user_name_list
     
     def user_exists(self, user_name):
+        logging.info("{0}:{1}: checking if user name: {2} exists".format(self.logprefix, "user_exists", user_name))
         return self.get_user_id(user_name) != -1
 
     def get_matches(self, text):

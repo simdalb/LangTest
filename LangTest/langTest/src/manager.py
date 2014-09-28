@@ -3,6 +3,7 @@ from logic import login
 from logic import menu
 from logic import testSelection
 import logging
+import sys
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -42,3 +43,4 @@ class Manager:
         
     def quit(self):
         self.data_manager.quit()
+        sys.exit(0)
