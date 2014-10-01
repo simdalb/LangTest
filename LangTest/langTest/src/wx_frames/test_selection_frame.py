@@ -42,10 +42,10 @@ class CreateTestPopupWindow(wx.Frame):
         self.logprefix = "CreateTestPopupWindow"
         super(CreateTestPopupWindow, self).__init__(parent, size=(300, 160))
         
-    def start(self, user_name, parent):
+    def start(self, test_name, parent):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.parent = parent
-        self.user_name = user_name
+        self.test_name = test_name
         self.Bind(wx.EVT_CLOSE, self.when_closed)
         self.SetBackgroundColour('WHITE')
         box = wx.BoxSizer(wx.VERTICAL)

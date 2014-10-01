@@ -3,6 +3,7 @@ import login_frame
 import menu_frame
 import create_test_frame
 import test_selection_frame
+import edit_test_frame
 
 class UIFactoryWXPython:
 	def __init__(self):
@@ -31,4 +32,7 @@ class UIFactoryWXPython:
 	
 	def create_InformTestExistsPopupWindow(self, parent):
 		return test_selection_frame.InformTestExistsPopupWindow(parent)
+	
+	def create_edit_test_UI(self):
+		return edit_test_frame.EditTestFrame()
 	

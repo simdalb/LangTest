@@ -59,6 +59,21 @@ Batch import button, creates popup with "Enter filename:" field, German to Engli
 below "Fields must be separated with a '|'".
 Finish button
 
+
+Edit test:
+
+view and edit item *
+search field with drop down *
+append item
+import from file
+clear all *
+export to file *
+
+* deactivated on first time
+
+import from file
+select file, and how many items to import
+
 3. See user statistics
 New window: Statistics
 "Please choose an option:"

@@ -42,7 +42,6 @@ class Login:
     def prompt_new_user(self, user_name):
         logging.info("{0}:{1}: creating user name: {2}".format(self.logprefix, "prompt_new_user", user_name))
         self.UI_factory.create_CreateUserPopupWindow(self.login_UI).start(user_name, self)
-        
+
     def quit(self):
         self.manager.quit()
-    

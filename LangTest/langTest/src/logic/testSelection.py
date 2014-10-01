@@ -18,7 +18,7 @@ class TestSelection:
         logging.info("{0}:{1}: test_name: {2} has test_id: {3}".format(self.logprefix, "set_test_name", test_name, test_id))
         test_exists = test_id > 0
         if test_exists:
-            self.manager.do_test(test_name, test_id)
+            self.manager.do_edit_test(test_name, test_id)
         return test_exists
     
     def get_tests(self):
@@ -37,7 +37,7 @@ class TestSelection:
         logging.info("{0}:{1}: creating test: {2}".format(self.logprefix, "create_test", test_name))
         self.test_selection_UI.finish()
         test_id = self.test_manager.create_test(test_name)
-        self.manager.do_create_test(test_name, test_id)
+        self.manager.do_edit_test(test_name, test_id)
 
     def prompt_new_test(self, test_name):
         logging.info("{0}:{1}: creating test: {2}".format(self.logprefix, "prompt_new_test", test_name))
