@@ -113,7 +113,7 @@ class LoginFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnButtonCreateClicked, button_create)
         hbox.Add(button_create, 1)
         vbox.Add(hbox, flag=wx.CENTER)
-        vbox.AddSpacer(20)
+        vbox.AddSpacer(60)
         button_quit = wx.Button(self, -1, 'Quit')
         self.Bind(wx.EVT_BUTTON, self.OnButtonQuitClicked, button_quit)
         grid = wx.GridSizer(1, 3)

@@ -28,13 +28,22 @@ class Manager:
         self.user_name = user_name
         self.user_id = user_id
         logging.info("{0}:{1}:".format(self.logprefix, "do_test_selection"))
-        theTestSelection = testSelection.TestSelection(self, self.UI_factory, self.data_manager.get_data_factory().get_test_manager())
+        theTestSelection = testSelection.TestSelection(self, 
+                                                       self.UI_factory, 
+                                                       self.data_manager.get_data_factory().get_test_manager())
         theTestSelection.start()
 
     def do_edit_test(self, test_name, test_id):
         self.test_name = test_name
         self.test_id = test_id
-        theEditTest = editTest.EditTest(self, self.UI_factory, self.data_manager.get_data_factory().get_test_manager(), test_name, test_id)
+        theEditTest = editTest.EditTest(self,
+                                        self.UI_factory,
+                                        self.data_manager.get_data_factory().get_test_manager(),
+                                        self.data_manager.get_data_factory().get_persistency_manager(),
+                                        self.user_name,
+                                        self.user_id,
+                                        test_name,
+                                        test_id)
         theEditTest.start()
 
     def do_stats(self):

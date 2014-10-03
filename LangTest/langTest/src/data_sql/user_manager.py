@@ -40,6 +40,7 @@ class UserManager:
     def create_user(self, user_name):
         logging.info("{0}:{1}: creating user name: {2}".format(self.logprefix, "create_user", user_name))
         self.cursor.execute("INSERT INTO users (userName) VALUES ('" + user_name + "')")
+        self.cursor.execute("INSERT INTO userPersistency VALUES ('" + str(self.get_user_id(user_name)) + "', '1')")
         logging.info("{0}:{1}: insertion done".format(self.logprefix, "create_user"))
         self.connect.commit()
         return self.get_user_id(user_name)

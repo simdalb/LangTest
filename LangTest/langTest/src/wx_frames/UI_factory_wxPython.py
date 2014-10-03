@@ -1,7 +1,5 @@
 
 import login_frame
-import menu_frame
-import create_test_frame
 import test_selection_frame
 import edit_test_frame
 
@@ -17,13 +15,7 @@ class UIFactoryWXPython:
 	
 	def create_InformUserExistsPopupWindow(self, parent):
 		return login_frame.InformUserExistsPopupWindow(parent)
-	
-	def create_menu_UI(self):
-		return menu_frame.MenuFrame()
-	
-	def create_test_creator_UI(self):
-		return create_test_frame.CreateTestFrame()
-	
+
 	def create_test_selection_UI(self):
 		return test_selection_frame.TestSelectionFrame()
 	

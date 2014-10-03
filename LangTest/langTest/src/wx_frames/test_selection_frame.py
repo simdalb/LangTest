@@ -113,7 +113,7 @@ class TestSelectionFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnButtonCreateClicked, button_create)
         hbox.Add(button_create, 1)
         vbox.Add(hbox, flag=wx.CENTER)
-        vbox.AddSpacer(20)
+        vbox.AddSpacer(60)
         button_quit = wx.Button(self, -1, 'Quit')
         self.Bind(wx.EVT_BUTTON, self.OnButtonQuitClicked, button_quit)
         button_login = wx.Button(self, -1, '<< Back\nto login')

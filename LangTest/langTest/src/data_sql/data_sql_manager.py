@@ -52,6 +52,14 @@ class DataSQLManager:
                                 "UNIQUE (timestamp)" + \
                              ")" \
                            )
+        self.cursor.execute( \
+                             "CREATE TABLE IF NOT EXISTS userPersistency " + \
+                             "(" + \
+                                "userId INTEGER NOT NULL, " + \
+                                "DeToEn BIT NOT NULL, " + \
+                                "FOREIGN KEY (userId) REFERENCES users(userId)" + \
+                             ")" \
+                           )
         logging.info("{0}:{1}: created DB: {2}".format(self.logprefix, "__init__", DB_NAME))
 
     def get_data_factory(self):
