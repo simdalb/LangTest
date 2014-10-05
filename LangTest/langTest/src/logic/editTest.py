@@ -32,6 +32,27 @@ class EditTest:
             logging.info("{0}:{1}: DeToEn: {2}".format(self.logprefix, "switchDeToEn", "False->True"))
             self.persistency_manager.setDeToEn(True, self.user_id)
 
+    def append_item(self, firstAppendTextValue, secondAppendTextValue):
+        if self.getDeToEn():
+            logging.info("{0}:{1}: appending de to en".format(self.logprefix, "append_item"))
+            return self.test_manager.append_item(self.test_id, firstAppendTextValue, secondAppendTextValue)
+        else:
+            logging.info("{0}:{1}: appending en to de".format(self.logprefix, "append_item"))
+            return self.test_manager.append_item(self.test_id, secondAppendTextValue, firstAppendTextValue)
+
+    def append_item_to_other_test(self, test_name, german_value, english_value):
+        logging.info("{0}:{1}: appending".format(self.logprefix, "append_item_to_other_test"))
+        self.test_manager.append_item_to_other_test(test_name, german_value, english_value)
+
+    def inform_item_exists(self, found_test_name):
+        self.UI_factory.create_InformItemExistsPopupWindow(self.edit_test_UI).start(found_test_name, self.test_name)
+        
+    def select_other_test(self, ret_list):
+        self.UI_factory.create_SelectOtherTestPopupWindow(self.edit_test_UI).start(ret_list)
+        
+    def inform_no_empty_fields(self):
+        self.UI_factory.create_InformNoEmptyFieldsPopupWindow(self.edit_test_UI).start()
+
     def quit(self):
         self.manager.quit()
 

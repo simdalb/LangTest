@@ -1,6 +1,5 @@
 
 import sqlite3
-from mysql.connector import errorcode
 import data_factory_SQL
 import logging
 
@@ -32,19 +31,20 @@ class DataSQLManager:
         self.cursor.execute( \
                              "CREATE TABLE IF NOT EXISTS testContents " + \
                              "(" + \
-                                "testId INTEGER NOT NULL, " + \
-                                "questionId INTEGER NOT NULL, " + \
+                                "testId INTEGER, " + \
+                                "questionId INTEGER, " + \
                                 "termLang1 CHAR(50) NOT NULL, " + \
                                 "termLang2 CHAR(50) NOT NULL, " + \
                                 "FOREIGN KEY (testId) REFERENCES tests(testId), " + \
                                 "PRIMARY KEY (questionId, testId)" + \
+                                "UNIQUE (termLang1, termLang2)" + \
                              ")" \
                            )
         self.cursor.execute( \
                              "CREATE TABLE IF NOT EXISTS stats " + \
                              "(" + \
-                                "userId INTEGER NOT NULL, " + \
-                                "testId INTEGER NOT NULL, " + \
+                                "userId INTEGER, " + \
+                                "testId INTEGER, " + \
                                 "timestamp CHAR(50) NOT NULL, " + \
                                 "score INTEGER NOT NULL, " + \
                                 "FOREIGN KEY (userId) REFERENCES users(userId), " + \
