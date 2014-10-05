@@ -43,12 +43,13 @@ class EditTest:
     def append_item_to_other_test(self, test_name, german_value, english_value):
         logging.info("{0}:{1}: appending".format(self.logprefix, "append_item_to_other_test"))
         self.test_manager.append_item_to_other_test(test_name, german_value, english_value)
+        self.edit_test_UI.clearAppendText()
 
     def inform_item_exists(self, found_test_name):
         self.UI_factory.create_InformItemExistsPopupWindow(self.edit_test_UI).start(found_test_name, self.test_name)
         
     def select_other_test(self, ret_list):
-        self.UI_factory.create_SelectOtherTestPopupWindow(self.edit_test_UI).start(ret_list)
+        self.UI_factory.create_SelectOtherTestPopupWindow(self.edit_test_UI).start(ret_list, self)
         
     def inform_no_empty_fields(self):
         self.UI_factory.create_InformNoEmptyFieldsPopupWindow(self.edit_test_UI).start()
