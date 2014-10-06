@@ -1,8 +1,61 @@
 
 import wx
 import logging
-import string
 from common import found_status
+
+class PromptDeleteTestPopupWindow(wx.Frame):
+    def __init__(self, parent):
+        self.logprefix = "PromptDeleteTestPopupWindow"
+        super(PromptDeleteTestPopupWindow, self).__init__(parent, size=(300, 160))
+    
+    def start(self, test_name, parent):
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
+        self.parent = parent
+        self.Bind(wx.EVT_CLOSE, self.when_closed)
+        self.SetBackgroundColour('WHITE')
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.AddSpacer(30)
+        hbox.Add(wx.StaticText(self, id=-1, label="\nReally delete test '" + test_name + "' ?", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        hbox.AddSpacer(30)
+        vbox.Add(hbox, flag=wx.CENTER)
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2.AddSpacer(30)
+        hbox2.Add(wx.StaticText(self, id=-1, label="\nThis operation cannot be undone\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        hbox2.AddSpacer(30)
+        vbox.Add(hbox2, flag=wx.CENTER)
+        hbox3 = wx.BoxSizer(wx.HORIZONTAL)
+        button_delete = wx.Button(self, -1, 'Delete test')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonDeleteTestClicked, button_delete)
+        hbox3.Add(button_delete, 1, flag=wx.CENTER)
+        hbox3.AddSpacer(30)
+        button_cancel = wx.Button(self, -1, 'Cancel')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonCancelClicked, button_cancel)
+        hbox3.Add(button_cancel, 1, flag=wx.CENTER)
+        vbox.Add(hbox3, flag=wx.CENTER)
+        vbox.Add(wx.StaticText(self, style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        self.SetSizerAndFit(vbox)
+        self.Centre()
+        self.Raise()
+        self.MakeModal(True)
+        self.Show()
+
+    def OnButtonDeleteTestClicked(self, event):
+        logging.info("{0}:{1}: user clicked delete".format(self.logprefix, "OnButtonDeleteTestClicked"))
+        self.parent.delete_test()
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+        
+    def OnButtonCancelClicked(self, event):
+        logging.info("{0}:{1}: user clicked cancel".format(self.logprefix, "OnButtonCancelClicked"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+        
+    def when_closed(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "when_closed"))
+        self.OnButtonCancelClicked(event)
 
 class InformNoEmptyFieldsPopupWindow(wx.Frame):
     def __init__(self, parent):
@@ -245,13 +298,14 @@ class EditTestFrame(wx.Frame):
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         self.button_import = wx.Button(self, -1, 'Import from file')
         self.button_export = wx.Button(self, -1, 'Export to file')
-        self.button_clear = wx.Button(self, -1, 'Clear test')
+        button_delete = wx.Button(self, -1, 'Delete test')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonDeleteTestClicked, button_delete)
         hbox2.Add((270,-1))
         hbox2.Add(self.button_import, flag=wx.CENTER)
         hbox2.Add((30,-1))
         hbox2.Add(self.button_export, flag=wx.CENTER)
         hbox2.Add((30,-1))
-        hbox2.Add(self.button_clear, flag=wx.CENTER)
+        hbox2.Add(button_delete, flag=wx.CENTER)
         hbox2.Add((270,-1))
         vbox.Add(hbox2, flag=wx.ALIGN_CENTER)
         vbox.AddSpacer(60)
@@ -280,12 +334,14 @@ class EditTestFrame(wx.Frame):
             self.input_search_term.Disable()
             self.button_search.Disable()
             self.button_export.Disable()
-            self.button_clear.Disable()
             self.button_start_test.Disable()
             self.fully_enabled = False
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
+        
+    def OnButtonDeleteTestClicked(self, event):
+        self.editTest.prompt_delete_test()
 
     def OnAppendClick(self, event):
         firstAppendTextValue = self.firstAppendText.GetValue()
@@ -306,7 +362,6 @@ class EditTestFrame(wx.Frame):
                     self.input_search_term.Enable()
                     self.button_search.Enable()
                     self.button_export.Enable()
-                    self.button_clear.Enable()
                     self.button_start_test.Enable()
                     self.fully_enabled = True
                 logging.info("{0}:{1}: Number of items: {2}".format(self.logprefix, "OnAppendClick", self.editTest.getNumberOfItems()))

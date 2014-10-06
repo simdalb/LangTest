@@ -100,3 +100,14 @@ class TestManager:
         self.cursor.execute("INSERT INTO testContents (testId, termLang1, termLang2) VALUES ('" 
                             + str(self.get_test_id(test_name)) + "','" + german_value + "','" + english_value + "')")
         self.connect.commit()
+        
+    def delete_test(self, test_id):
+        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        rows = self.cursor.fetchall()
+        for row in rows:
+            logging.info("{0}:{1}: found database {2}".format(self.logprefix, "delete_test", row[0]))
+            try:
+                self.cursor.execute("DELETE FROM " + row[0] + " WHERE testId = '" + str(test_id) + "'")
+                self.connect.commit()
+            except:
+                pass

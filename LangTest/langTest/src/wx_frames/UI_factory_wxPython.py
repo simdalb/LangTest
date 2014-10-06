@@ -36,3 +36,6 @@ class UIFactoryWXPython:
 
 	def create_InformNoEmptyFieldsPopupWindow(self, parent):
 		return edit_test_frame.InformNoEmptyFieldsPopupWindow(parent)
+	
+	def create_PromptDeleteTestPopupWindow(self, parent):
+		return edit_test_frame.PromptDeleteTestPopupWindow(parent)

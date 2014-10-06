@@ -53,6 +53,12 @@ class EditTest:
         
     def inform_no_empty_fields(self):
         self.UI_factory.create_InformNoEmptyFieldsPopupWindow(self.edit_test_UI).start()
+        
+    def prompt_delete_test(self):
+        self.UI_factory.create_PromptDeleteTestPopupWindow(self.edit_test_UI).start(self.test_name, self)
+        
+    def delete_test(self):
+        self.test_manager.delete_test(self.test_id)
 
     def quit(self):
         self.manager.quit()
