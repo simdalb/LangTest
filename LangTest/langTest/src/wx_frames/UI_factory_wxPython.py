@@ -2,6 +2,7 @@
 import login_frame
 import test_selection_frame
 import edit_test_frame
+import wx
 
 class UIFactoryWXPython:
 	def __init__(self):
@@ -39,3 +40,11 @@ class UIFactoryWXPython:
 	
 	def create_PromptDeleteTestPopupWindow(self, parent):
 		return edit_test_frame.PromptDeleteTestPopupWindow(parent)
+	
+	def getPathFromImportFileDialog(self, parent):
+		openFileDialog = wx.FileDialog(parent, style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+		openFileDialog.ShowModal()
+		path = openFileDialog.GetPath()
+		openFileDialog.Destroy()
+		return path
+	

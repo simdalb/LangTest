@@ -97,7 +97,7 @@ class InformItemExistsPopupWindow(wx.Frame):
         self.logprefix = "InformItemExistsPopupWindow"
         super(InformItemExistsPopupWindow, self).__init__(parent, size=(300, 160))
 
-    def start(self, found_test_name, current_test_name):
+    def start(self, found_test_name, current_test_name, firstAppendTextValue, secondAppendTextValue):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.Bind(wx.EVT_CLOSE, self.when_closed)
         self.SetBackgroundColour('WHITE')
@@ -105,12 +105,12 @@ class InformItemExistsPopupWindow(wx.Frame):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         hbox.Add(wx.StaticText(self, label="    ", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         if found_test_name == current_test_name:
-            hbox.Add(wx.StaticText(self, label="\nThis item already exists in this test\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+            hbox.Add(wx.StaticText(self, label="\nThe item '" + firstAppendTextValue + " | " + secondAppendTextValue + "' already exists in this test\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         else:
-            hbox.Add(wx.StaticText(self, label="\nThis item already exists in test '" + found_test_name + "'\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+            hbox.Add(wx.StaticText(self, label="\nThe item '" + firstAppendTextValue + " | " + secondAppendTextValue + "' already exists in test '" + found_test_name + "'\n", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         hbox.Add(wx.StaticText(self, label="    ", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         vbox.Add(hbox)
-        vbox.AddSpacer(30)
+        vbox.AddSpacer(20)
         button_ok = wx.Button(self, -1, 'OK')
         self.Bind(wx.EVT_BUTTON, self.OnButtonOKClicked, button_ok)
         vbox.Add(button_ok, 1, flag=wx.CENTER)
@@ -296,12 +296,13 @@ class EditTestFrame(wx.Frame):
         vbox.Add(grid2, flag=wx.CENTER)
         vbox.Add(wx.StaticText(self, label='\nMultiple item operations:\n'), flag=wx.CENTER)
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        self.button_import = wx.Button(self, -1, 'Import from file')
+        button_import = wx.Button(self, -1, 'Import from file')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonImportClicked, button_import)
         self.button_export = wx.Button(self, -1, 'Export to file')
         button_delete = wx.Button(self, -1, 'Delete test')
         self.Bind(wx.EVT_BUTTON, self.OnButtonDeleteTestClicked, button_delete)
         hbox2.Add((270,-1))
-        hbox2.Add(self.button_import, flag=wx.CENTER)
+        hbox2.Add(button_import, flag=wx.CENTER)
         hbox2.Add((30,-1))
         hbox2.Add(self.button_export, flag=wx.CENTER)
         hbox2.Add((30,-1))
@@ -340,6 +341,11 @@ class EditTestFrame(wx.Frame):
         self.Centre()
         self.Show()
         
+    def OnButtonImportClicked(self, event):
+        path = self.editTest.import_test()
+        logging.info("{0}:{1}: user entered path: {2}".format(self.logprefix, "OnButtonImportClicked", path))
+        self.editTest.parse_file(path)
+        
     def OnButtonDeleteTestClicked(self, event):
         self.editTest.prompt_delete_test()
 
@@ -350,28 +356,34 @@ class EditTestFrame(wx.Frame):
             self.editTest.inform_no_empty_fields()
         else:
             ret_list = self.editTest.append_item(firstAppendTextValue, secondAppendTextValue)
-            the_found_status = ret_list[0][0]
-            logging.info("{0}:{1}: found status: {2}".format(self.logprefix, "OnAppendClick", the_found_status))
-            if the_found_status == found_status.FoundStatus.NONE_FOUND:
-                if not self.fully_enabled:
-                    self.firstEditText.Enable()
-                    self.secondEditText.Enable()
-                    self.button_switch.Enable()
-                    self.button_next_item.Enable()
-                    self.button_previous_item.Enable()
-                    self.input_search_term.Enable()
-                    self.button_search.Enable()
-                    self.button_export.Enable()
-                    self.button_start_test.Enable()
-                    self.fully_enabled = True
-                logging.info("{0}:{1}: Number of items: {2}".format(self.logprefix, "OnAppendClick", self.editTest.getNumberOfItems()))
-                self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
-                self.clearAppendText()
-            elif the_found_status == found_status.FoundStatus.BOTH_FOUND:
-                found_test_name = ret_list[0][1].keys()[0]
-                self.editTest.inform_item_exists(found_test_name)
+            self.process_ret_list(ret_list)
+            
+    def process_ret_list(self, ret_list):
+        the_found_status = ret_list[0][0]
+        logging.info("{0}:{1}: found status: {2}".format(self.logprefix, "OnAppendClick", the_found_status))
+        if the_found_status == found_status.FoundStatus.NONE_FOUND:
+            if not self.fully_enabled:
+                self.firstEditText.Enable()
+                self.secondEditText.Enable()
+                self.button_switch.Enable()
+                self.button_next_item.Enable()
+                self.button_previous_item.Enable()
+                self.input_search_term.Enable()
+                self.button_search.Enable()
+                self.button_export.Enable()
+                self.button_start_test.Enable()
+                self.fully_enabled = True
+            logging.info("{0}:{1}: Number of items: {2}".format(self.logprefix, "OnAppendClick", self.editTest.getNumberOfItems()))
+            self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
+            self.clearAppendText()
+        elif the_found_status == found_status.FoundStatus.BOTH_FOUND:
+            found_test_name = ret_list[0][1].keys()[0]
+            if self.editTest.getDeToEn():
+                self.editTest.inform_item_exists(found_test_name, ret_list[0][2], ret_list[0][3])
             else:
-                self.editTest.select_other_test(ret_list)
+                self.editTest.inform_item_exists(found_test_name, ret_list[0][3], ret_list[0][2])
+        else:
+            self.editTest.select_other_test(ret_list)
                 
     def clearAppendText(self):
         self.firstAppendText.Clear()

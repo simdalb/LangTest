@@ -32,7 +32,7 @@ class DataSQLManager:
                              "CREATE TABLE IF NOT EXISTS testContents " + \
                              "(" + \
                                 "testId INTEGER, " + \
-                                "questionId INTEGER, " + \
+                                "questionId INTEGER DEFAULT 0, " + \
                                 "termLang1 CHAR(50) NOT NULL, " + \
                                 "termLang2 CHAR(50) NOT NULL, " + \
                                 "FOREIGN KEY (testId) REFERENCES tests(testId), " + \
@@ -60,6 +60,16 @@ class DataSQLManager:
                                 "FOREIGN KEY (userId) REFERENCES users(userId)" + \
                              ")" \
                            )
+        self.cursor.execute( \
+                             "CREATE TRIGGER IF NOT EXISTS inc_questionId " + \
+                             "AFTER INSERT ON testContents " + \
+                             "BEGIN " + \
+                             "  UPDATE testContents " + \
+                             "  SET    questionId = (SELECT MAX(questionId) + 1 FROM testContents) " + \
+                             "  WHERE  rowid = NEW.rowid; " + \
+                             "END" \
+                           )
+        
         logging.info("{0}:{1}: created DB: {2}".format(self.logprefix, "__init__", DB_NAME))
 
     def get_data_factory(self):

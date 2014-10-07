@@ -45,8 +45,11 @@ class EditTest:
         self.test_manager.append_item_to_other_test(test_name, german_value, english_value)
         self.edit_test_UI.clearAppendText()
 
-    def inform_item_exists(self, found_test_name):
-        self.UI_factory.create_InformItemExistsPopupWindow(self.edit_test_UI).start(found_test_name, self.test_name)
+    def inform_item_exists(self, found_test_name, firstAppendTextValue, secondAppendTextValue):
+        self.UI_factory.create_InformItemExistsPopupWindow(self.edit_test_UI).start(found_test_name, 
+                                                                                    self.test_name, 
+                                                                                    firstAppendTextValue, 
+                                                                                    secondAppendTextValue)
         
     def select_other_test(self, ret_list):
         self.UI_factory.create_SelectOtherTestPopupWindow(self.edit_test_UI).start(ret_list, self)
@@ -59,7 +62,29 @@ class EditTest:
         
     def delete_test(self):
         self.test_manager.delete_test(self.test_id)
+        
+    def import_test(self):
+        return self.UI_factory.getPathFromImportFileDialog(self.edit_test_UI)
 
+    def parse_file(self, path):
+        input_file = open(path, "r")
+        termsList = []
+        for line in input_file:
+            if(line[-1] == "\n"):
+                line = line[:-1]
+            terms = line.split("|")
+            if(len(terms) != 2):
+                input_file.close()
+                return (-1, len(termsList) + 1)
+            terms[0] = terms[0].strip()
+            terms[1] = terms[1].strip()
+            logging.info("{0}:{1}: left term: {2}, right term: {3}".format(self.logprefix, "parse_file", terms[0], terms[1]))
+            termsList.append(terms)    
+        input_file.close()
+        for terms in termsList:
+            self.edit_test_UI.process_ret_list(self.append_item(terms[0], terms[1]))
+        return (0, 0)
+    
     def quit(self):
         self.manager.quit()
 
