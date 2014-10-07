@@ -64,7 +64,17 @@ class EditTest:
         self.test_manager.delete_test(self.test_id)
         
     def import_test(self):
-        return self.UI_factory.getPathFromImportFileDialog(self.edit_test_UI)
+        return self.UI_factory.getPathForImportFileDialog(self.edit_test_UI)
+    
+    def export_test(self):
+        return self.UI_factory.getPathForExportFileDialog(self.edit_test_UI)
+    
+    def write_to_file(self, path):
+        output_file = open(path, "w")
+        items = self.test_manager.getAllItems(self.test_id)
+        for item in items:
+            output_file.write(item[0] + " | " + item[1] + "\n")
+        output_file.close()
 
     def parse_file(self, path):
         input_file = open(path, "r")

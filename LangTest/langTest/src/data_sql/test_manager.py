@@ -111,3 +111,7 @@ class TestManager:
                 self.connect.commit()
             except:
                 pass
+
+    def getAllItems(self, test_id):
+        self.cursor.execute("SELECT termLang1, termLang2 FROM testContents WHERE testId = '" + str(test_id) + "'")
+        return self.cursor.fetchall()

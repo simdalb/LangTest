@@ -299,6 +299,7 @@ class EditTestFrame(wx.Frame):
         button_import = wx.Button(self, -1, 'Import from file')
         self.Bind(wx.EVT_BUTTON, self.OnButtonImportClicked, button_import)
         self.button_export = wx.Button(self, -1, 'Export to file')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonExportClicked, self.button_export)
         button_delete = wx.Button(self, -1, 'Delete test')
         self.Bind(wx.EVT_BUTTON, self.OnButtonDeleteTestClicked, button_delete)
         hbox2.Add((270,-1))
@@ -340,6 +341,11 @@ class EditTestFrame(wx.Frame):
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
+        
+    def OnButtonExportClicked(self, event):
+        path = self.editTest.export_test()
+        logging.info("{0}:{1}: user entered path: {2}".format(self.logprefix, "OnButtonExportClicked", path))
+        self.editTest.write_to_file(path)
         
     def OnButtonImportClicked(self, event):
         path = self.editTest.import_test()
