@@ -247,15 +247,20 @@ class EditTestFrame(wx.Frame):
         grid.Add(wx.StaticText(self))
         self.firstEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
         self.secondEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
+        grid.Add(self.firstEditText, flag=wx.CENTER)
+        grid.Add(self.secondEditText, flag=wx.CENTER)
+        grid2 = wx.FlexGridSizer(2, 2, hgap=10, vgap=10)
         self.button_next_item = wx.Button(self, -1, label='Show first item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonNextClicked, self.button_next_item)
         self.button_previous_item = wx.Button(self, -1, label='Show previous item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonPreviousClicked, self.button_previous_item)
+        self.button_save_item = wx.Button(self, -1, label='Save modified item')
         self.button_shift_item = wx.Button(self, -1, label='Move item\nto another test')
-        grid.Add(self.firstEditText, flag=wx.CENTER)
-        grid.Add(self.secondEditText, flag=wx.CENTER)
-        grid.Add(self.button_next_item, flag=wx.CENTER)
-        grid.Add(self.button_previous_item, flag=wx.CENTER)
+        grid2.Add(self.button_next_item, flag=wx.CENTER)
+        grid2.Add(self.button_previous_item, flag=wx.CENTER)
+        grid2.Add(self.button_save_item, flag=wx.CENTER)
+        grid2.Add(self.button_shift_item, flag=wx.CENTER)
+        grid.Add(grid2, flag=wx.CENTER)
         vbox.Add(grid, flag=wx.CENTER)
         vbox.Add(wx.StaticText(self, label='\nSearch for an item in the test:\n'), flag=wx.CENTER)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -331,12 +336,12 @@ class EditTestFrame(wx.Frame):
         vbox.AddSpacer(30)
         self.fully_enabled = True
         self.button_previous_item.Disable()
+        self.button_save_item.Disable()
+        self.button_shift_item.Disable()
+        self.firstEditText.Disable()
+        self.secondEditText.Disable()
         if not self.editTest.getNumberOfItems():
-            self.firstEditText.Disable()
-            self.secondEditText.Disable()
-            self.button_switch.Disable()
             self.button_next_item.Disable()
-            self.button_shift_item.Disable()
             self.input_search_term.Disable()
             self.button_search.Disable()
             self.button_export.Disable()
@@ -359,13 +364,22 @@ class EditTestFrame(wx.Frame):
         
     def OnButtonNextClicked(self, event):
         logging.info("{0}:{1}:".format(self.logprefix, "OnButtonNextClicked"))
-        self.button_next_item.SetLabel("Show next item")
         (is_end, itemFirst, itemSecond) = self.editTest.getNextItem()
         logging.info("{0}:{1}: is_end: {2}".format(self.logprefix, "OnButtonNextClicked", is_end))
+        firstEditTextIsEnabled = self.firstEditText.Enabled
+        logging.info("{0}:{1}: firstEditTextIsEnabled: {2}, isNotFirstItem: {3}".format(self.logprefix, "OnButtonNextClicked", firstEditTextIsEnabled, self.editTest.isNotFirstItem()))
+        if self.editTest.isNotFirstItem():
+            logging.info("{0}:{1}: enabling previous item buttons".format(self.logprefix, "OnButtonNextClicked"))
+            self.button_next_item.SetLabel("Show next item")
+            self.button_previous_item.Enable()
+        if not self.firstEditText.Enabled:
+            logging.info("{0}:{1}: enabling other buttons".format(self.logprefix, "OnButtonNextClicked"))
+            self.button_next_item.SetLabel("Show next item")
+            self.button_shift_item.Enable()
+            self.firstEditText.Enable()
+            self.secondEditText.Enable()
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
-        if self.editTest.isNotFirstItem():
-            self.button_previous_item.Enable()
         if is_end:
             self.button_next_item.Disable()
         
@@ -443,6 +457,9 @@ class EditTestFrame(wx.Frame):
         firstAppendTextValue = self.firstAppendText.GetValue()
         self.firstAppendText.SetValue(self.secondAppendText.GetValue())
         self.secondAppendText.SetValue(firstAppendTextValue)
+        firstEditTextValue = self.firstEditText.GetValue()
+        self.firstEditText.SetValue(self.secondEditText.GetValue())
+        self.secondEditText.SetValue(firstEditTextValue)
         
     def OnButtonSearchClicked(self, event):
         logging.info("{0}:{1}: user clicked search".format(self.logprefix, "OnButtonSearchClicked"))
