@@ -101,8 +101,23 @@ class TestManager:
         return ret_list
 
     def append_item_to_other_test(self, test_name, german_value, english_value):
+        logging.info("{0}:{1}: appending german_value: {2}, english_value: {3} to test: {4}".format(self.logprefix, 
+                                                                                                    "append_item_to_other_test", 
+                                                                                                    german_value,
+                                                                                                    english_value,
+                                                                                                    test_name))
         self.cursor.execute("INSERT INTO testContents (testId, termLang1, termLang2) VALUES ('" 
                             + str(self.get_test_id(test_name)) + "','" + german_value + "','" + english_value + "')")
+        self.connect.commit()
+        
+    def modify_question(self, questionId, firstTextValue, secondTextValue):
+        logging.info("{0}:{1}: changing to german_value: {2}, english_value: {3} for question id: {4}".format(self.logprefix, 
+                                                                                                              "modify_question", 
+                                                                                                              firstTextValue,
+                                                                                                              secondTextValue,
+                                                                                                              questionId))
+        self.cursor.execute("UPDATE testContents SET termLang1 = '" + firstTextValue + "', termLang2 = '" + secondTextValue \
+                            + "' WHERE questionId = '" + str(questionId) + "'")
         self.connect.commit()
         
     def delete_test(self, test_id):

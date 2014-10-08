@@ -46,6 +46,13 @@ class EditTest:
         else:
             logging.info("{0}:{1}: appending en to de".format(self.logprefix, "append_item"))
             return self.test_manager.append_item(self.test_id, secondAppendTextValue, firstAppendTextValue)
+        
+    def modify_question(self, firstTextValue, secondTextValue):
+        self.testList[self.itemNumber - 1] = (self.questionId, firstTextValue, secondTextValue)
+        if self.getDeToEn():
+            self.test_manager.modify_question(self.questionId, firstTextValue, secondTextValue)
+        else:
+            self.test_manager.modify_question(self.questionId, secondTextValue, firstTextValue)
 
     def append_item_to_other_test(self, test_name, german_value, english_value):
         logging.info("{0}:{1}: appending".format(self.logprefix, "append_item_to_other_test"))

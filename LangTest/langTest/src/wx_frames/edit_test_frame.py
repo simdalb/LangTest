@@ -364,7 +364,8 @@ class EditTestFrame(wx.Frame):
             self.button_save_item.Enable()
         
     def OnButtonSaveClicked(self, event):
-        pass
+        self.editTest.modify_question(self.firstEditText.GetValue(), self.secondEditText.GetValue())
+        self.button_save_item.Disable()
         
     def OnButtonPreviousClicked(self, event):
         logging.info("{0}:{1}:".format(self.logprefix, "OnButtonPreviousClicked"))
