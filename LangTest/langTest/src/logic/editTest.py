@@ -14,6 +14,9 @@ class EditTest:
         self.user_id = user_id
         self.test_name = test_name
         self.test_id = test_id
+        self.testList = []
+        self.itemNumber = -1
+        self.questionId = -1
 
     def start(self):
         self.edit_test_UI.start(self)
@@ -75,6 +78,31 @@ class EditTest:
         for item in items:
             output_file.write(item[0] + " | " + item[1] + "\n")
         output_file.close()
+        
+    def getNextItem(self):
+        if not self.testList:
+            self.testList = self.test_manager.getTestList(self.test_id)
+            self.itemNumber = 0
+        if self.itemNumber < len(self.testList):
+            (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber]
+            logging.info("{0}:{1}: list length: {2}, returning questionId: {3}, itemNumber: {4}".format(self.logprefix, 
+                                                                                                        "getNextItem", 
+                                                                                                        len(self.testList),
+                                                                                                        self.questionId, 
+                                                                                                        self.itemNumber))
+            self.itemNumber += 1
+            is_end = False
+            if self.itemNumber == len(self.testList):
+                is_end = True
+            if self.getDeToEn():
+                logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getNextItem", itemFirst, itemSecond))
+                return (is_end, itemFirst, itemSecond)
+            else:
+                logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getNextItem", itemSecond, itemFirst))
+                return (is_end, itemSecond, itemFirst)
+        else:
+            logging.info("{0}:{1}: error, end of list already reached".format(self.logprefix, "getNextItem"))
+            return None
 
     def parse_file(self, path):
         input_file = open(path, "r")

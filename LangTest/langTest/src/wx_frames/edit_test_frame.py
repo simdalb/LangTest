@@ -248,7 +248,9 @@ class EditTestFrame(wx.Frame):
         self.firstEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
         self.secondEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
         self.button_next_item = wx.Button(self, -1, label='Show first item')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonNextClicked, self.button_next_item)
         self.button_previous_item = wx.Button(self, -1, label='Show previous item')
+        self.button_shift_item = wx.Button(self, -1, label='Move item\nto another test')
         grid.Add(self.firstEditText, flag=wx.CENTER)
         grid.Add(self.secondEditText, flag=wx.CENTER)
         grid.Add(self.button_next_item, flag=wx.CENTER)
@@ -333,6 +335,7 @@ class EditTestFrame(wx.Frame):
             self.button_switch.Disable()
             self.button_next_item.Disable()
             self.button_previous_item.Disable()
+            self.button_shift_item.Disable()
             self.input_search_term.Disable()
             self.button_search.Disable()
             self.button_export.Disable()
@@ -341,6 +344,16 @@ class EditTestFrame(wx.Frame):
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
+        
+    def OnButtonNextClicked(self, event):
+        logging.info("{0}:{1}:".format(self.logprefix, "OnButtonNextClicked"))
+        self.button_next_item.SetLabel("Show next item")
+        (is_end, itemFirst, itemSecond) = self.editTest.getNextItem()
+        logging.info("{0}:{1}: is_end: {2}".format(self.logprefix, "OnButtonNextClicked", is_end))
+        self.firstEditText.SetValue(itemFirst)
+        self.secondEditText.SetValue(itemSecond)
+        if is_end:
+            self.button_next_item.Disable()
         
     def OnButtonExportClicked(self, event):
         path = self.editTest.export_test()
@@ -374,6 +387,7 @@ class EditTestFrame(wx.Frame):
                 self.button_switch.Enable()
                 self.button_next_item.Enable()
                 self.button_previous_item.Enable()
+                self.button_shift_item.Enable()
                 self.input_search_term.Enable()
                 self.button_search.Enable()
                 self.button_export.Enable()

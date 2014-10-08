@@ -36,6 +36,10 @@ class TestManager:
     
     def test_exists(self, test_name):
         return self.get_test_id(test_name) != -1
+    
+    def getTestList(self, test_id):
+        self.cursor.execute("SELECT questionId, termLang1, termLang2 FROM testContents WHERE testId = '" + str(test_id) + "'")
+        return self.cursor.fetchall()
 
     def get_matches(self, text):
         logging.info("{0}:{1}: searching for test names that match text: {2}".format(self.logprefix, "get_matches", text))
