@@ -26,6 +26,10 @@ class EditTest:
     
     def getNumberOfItems(self):
         return self.test_manager.getNumberOfItems(self.test_id)
+    
+    def isNotFirstItem(self):
+        logging.info("{0}:{1}: current item number: {2}".format(self.logprefix, "isNotFirstItem", self.itemNumber))
+        return self.itemNumber > 1
 
     def switchDeToEn(self):
         if self.getDeToEn():
@@ -103,6 +107,16 @@ class EditTest:
         else:
             logging.info("{0}:{1}: error, end of list already reached".format(self.logprefix, "getNextItem"))
             return None
+        
+    def getPreviousItem(self):
+        self.itemNumber -= 1
+        (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber - 1]
+        if self.getDeToEn():
+            logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getNextItem", itemFirst, itemSecond))
+            return (itemFirst, itemSecond)
+        else:
+            logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getNextItem", itemSecond, itemFirst))
+            return (itemSecond, itemFirst)
 
     def parse_file(self, path):
         input_file = open(path, "r")

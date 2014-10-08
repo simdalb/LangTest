@@ -250,6 +250,7 @@ class EditTestFrame(wx.Frame):
         self.button_next_item = wx.Button(self, -1, label='Show first item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonNextClicked, self.button_next_item)
         self.button_previous_item = wx.Button(self, -1, label='Show previous item')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonPreviousClicked, self.button_previous_item)
         self.button_shift_item = wx.Button(self, -1, label='Move item\nto another test')
         grid.Add(self.firstEditText, flag=wx.CENTER)
         grid.Add(self.secondEditText, flag=wx.CENTER)
@@ -329,12 +330,12 @@ class EditTestFrame(wx.Frame):
         vbox.Add(hbox3, flag=wx.CENTER)
         vbox.AddSpacer(30)
         self.fully_enabled = True
+        self.button_previous_item.Disable()
         if not self.editTest.getNumberOfItems():
             self.firstEditText.Disable()
             self.secondEditText.Disable()
             self.button_switch.Disable()
             self.button_next_item.Disable()
-            self.button_previous_item.Disable()
             self.button_shift_item.Disable()
             self.input_search_term.Disable()
             self.button_search.Disable()
@@ -345,6 +346,17 @@ class EditTestFrame(wx.Frame):
         self.Centre()
         self.Show()
         
+    def OnButtonPreviousClicked(self, event):
+        logging.info("{0}:{1}:".format(self.logprefix, "OnButtonPreviousClicked"))
+        (itemFirst, itemSecond) = self.editTest.getPreviousItem()
+        self.firstEditText.SetValue(itemFirst)
+        self.secondEditText.SetValue(itemSecond)
+        if not self.editTest.isNotFirstItem():
+            logging.info("{0}:{1}: beginning reached".format(self.logprefix, "OnButtonPreviousClicked"))
+            self.button_previous_item.Disable()
+        if not self.button_next_item.IsEnabled():
+            self.button_next_item.Enable()
+        
     def OnButtonNextClicked(self, event):
         logging.info("{0}:{1}:".format(self.logprefix, "OnButtonNextClicked"))
         self.button_next_item.SetLabel("Show next item")
@@ -352,6 +364,8 @@ class EditTestFrame(wx.Frame):
         logging.info("{0}:{1}: is_end: {2}".format(self.logprefix, "OnButtonNextClicked", is_end))
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
+        if self.editTest.isNotFirstItem():
+            self.button_previous_item.Enable()
         if is_end:
             self.button_next_item.Disable()
         
@@ -386,7 +400,6 @@ class EditTestFrame(wx.Frame):
                 self.secondEditText.Enable()
                 self.button_switch.Enable()
                 self.button_next_item.Enable()
-                self.button_previous_item.Enable()
                 self.button_shift_item.Enable()
                 self.input_search_term.Enable()
                 self.button_search.Enable()
