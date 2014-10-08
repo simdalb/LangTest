@@ -224,6 +224,7 @@ class EditTestFrame(wx.Frame):
     def start(self, editTest):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.editTest = editTest
+        self.ignore_edit_text_changed = 0
         self.Bind(wx.EVT_CLOSE, self.when_closed)
         self.SetBackgroundColour('WHITE')
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -247,6 +248,8 @@ class EditTestFrame(wx.Frame):
         grid.Add(wx.StaticText(self))
         self.firstEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
         self.secondEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
+        self.Bind(wx.EVT_TEXT, self.OnEditTextChanged, self.firstEditText)
+        self.Bind(wx.EVT_TEXT, self.OnEditTextChanged, self.secondEditText)
         grid.Add(self.firstEditText, flag=wx.CENTER)
         grid.Add(self.secondEditText, flag=wx.CENTER)
         grid2 = wx.FlexGridSizer(2, 2, hgap=10, vgap=10)
@@ -255,6 +258,7 @@ class EditTestFrame(wx.Frame):
         self.button_previous_item = wx.Button(self, -1, label='Show previous item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonPreviousClicked, self.button_previous_item)
         self.button_save_item = wx.Button(self, -1, label='Save modified item')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonSaveClicked, self.button_save_item)
         self.button_shift_item = wx.Button(self, -1, label='Move item\nto another test')
         grid2.Add(self.button_next_item, flag=wx.CENTER)
         grid2.Add(self.button_previous_item, flag=wx.CENTER)
@@ -351,9 +355,22 @@ class EditTestFrame(wx.Frame):
         self.Centre()
         self.Show()
         
+    def OnEditTextChanged(self, event):
+        if not self.ignore_edit_text_changed == 0:
+            logging.info("{0}:{1}: ignore_edit_text_changed: {2}, will now be decremented".format(self.logprefix, "OnEditTextChanged", self.ignore_edit_text_changed))
+            self.ignore_edit_text_changed -= 1
+        else:
+            logging.info("{0}:{1}:".format(self.logprefix, "OnEditTextChanged"))
+            self.button_save_item.Enable()
+        
+    def OnButtonSaveClicked(self, event):
+        pass
+        
     def OnButtonPreviousClicked(self, event):
         logging.info("{0}:{1}:".format(self.logprefix, "OnButtonPreviousClicked"))
+        self.button_save_item.Disable()
         (itemFirst, itemSecond) = self.editTest.getPreviousItem()
+        self.ignore_edit_text_changed = 2
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
         if not self.editTest.isNotFirstItem():
@@ -364,6 +381,7 @@ class EditTestFrame(wx.Frame):
         
     def OnButtonNextClicked(self, event):
         logging.info("{0}:{1}:".format(self.logprefix, "OnButtonNextClicked"))
+        self.button_save_item.Disable()
         (is_end, itemFirst, itemSecond) = self.editTest.getNextItem()
         logging.info("{0}:{1}: is_end: {2}".format(self.logprefix, "OnButtonNextClicked", is_end))
         firstEditTextIsEnabled = self.firstEditText.Enabled
@@ -378,6 +396,7 @@ class EditTestFrame(wx.Frame):
             self.button_shift_item.Enable()
             self.firstEditText.Enable()
             self.secondEditText.Enable()
+        self.ignore_edit_text_changed = 2
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
         if is_end:
