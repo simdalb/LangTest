@@ -430,11 +430,7 @@ class EditTestFrame(wx.Frame):
         logging.info("{0}:{1}: found status: {2}".format(self.logprefix, "OnAppendClick", the_found_status))
         if the_found_status == found_status.FoundStatus.NONE_FOUND:
             if not self.fully_enabled:
-                self.firstEditText.Enable()
-                self.secondEditText.Enable()
                 self.button_switch.Enable()
-                self.button_next_item.Enable()
-                self.button_shift_item.Enable()
                 self.input_search_term.Enable()
                 self.button_search.Enable()
                 self.button_export.Enable()
@@ -443,6 +439,8 @@ class EditTestFrame(wx.Frame):
             logging.info("{0}:{1}: Number of items: {2}".format(self.logprefix, "OnAppendClick", self.editTest.getNumberOfItems()))
             self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
             self.clearAppendText()
+            if not self.button_next_item.IsEnabled():
+                self.button_next_item.Enable()
         elif the_found_status == found_status.FoundStatus.BOTH_FOUND:
             found_test_name = ret_list[0][1].keys()[0]
             if self.editTest.getDeToEn():
@@ -477,6 +475,7 @@ class EditTestFrame(wx.Frame):
         firstAppendTextValue = self.firstAppendText.GetValue()
         self.firstAppendText.SetValue(self.secondAppendText.GetValue())
         self.secondAppendText.SetValue(firstAppendTextValue)
+        self.ignore_edit_text_changed = 2
         firstEditTextValue = self.firstEditText.GetValue()
         self.firstEditText.SetValue(self.secondEditText.GetValue())
         self.secondEditText.SetValue(firstEditTextValue)

@@ -99,6 +99,12 @@ class TestManager:
         self.connect.commit()
         ret_list.append((found_status.FoundStatus.NONE_FOUND, found_test_name_to_values, german_value, english_value))
         return ret_list
+    
+    def get_question_id(self, german_value, english_value):
+        self.cursor.execute("SELECT questionId FROM testContents WHERE termLang1 = '" + german_value 
+                            + "' AND termLang2 = '" + english_value + "'")
+        row = self.cursor.fetchone()
+        return row[0]
 
     def append_item_to_other_test(self, test_name, german_value, english_value):
         logging.info("{0}:{1}: appending german_value: {2}, english_value: {3} to test: {4}".format(self.logprefix, 

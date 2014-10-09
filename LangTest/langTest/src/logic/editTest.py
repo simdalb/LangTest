@@ -1,5 +1,6 @@
 
 import logging
+from common import found_status
 
 class EditTest:
     def __init__(self, manager, UI_factory, test_manager, persistency_manager, user_name, user_id, test_name, test_id):
@@ -40,18 +41,29 @@ class EditTest:
             self.persistency_manager.setDeToEn(True, self.user_id)
 
     def append_item(self, firstAppendTextValue, secondAppendTextValue):
+        if self.itemNumber == -1:
+            self.itemNumber = 0
         if self.getDeToEn():
             logging.info("{0}:{1}: appending de to en".format(self.logprefix, "append_item"))
-            return self.test_manager.append_item(self.test_id, firstAppendTextValue, secondAppendTextValue)
+            ret_list = self.test_manager.append_item(self.test_id, firstAppendTextValue, secondAppendTextValue)
+            if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
+                self.testList.append([self.test_manager.get_question_id(firstAppendTextValue, secondAppendTextValue), 
+                                      firstAppendTextValue, secondAppendTextValue])
+            return ret_list
         else:
             logging.info("{0}:{1}: appending en to de".format(self.logprefix, "append_item"))
-            return self.test_manager.append_item(self.test_id, secondAppendTextValue, firstAppendTextValue)
+            ret_list = self.test_manager.append_item(self.test_id, secondAppendTextValue, firstAppendTextValue)
+            if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
+                self.testList.append([self.test_manager.get_question_id(secondAppendTextValue, firstAppendTextValue), 
+                                      secondAppendTextValue, firstAppendTextValue])
+            return ret_list
         
     def modify_question(self, firstTextValue, secondTextValue):
-        self.testList[self.itemNumber - 1] = (self.questionId, firstTextValue, secondTextValue)
         if self.getDeToEn():
+            self.testList[self.itemNumber - 1] = (self.questionId, firstTextValue, secondTextValue)
             self.test_manager.modify_question(self.questionId, firstTextValue, secondTextValue)
         else:
+            self.testList[self.itemNumber - 1] = (self.questionId, secondTextValue, firstTextValue)
             self.test_manager.modify_question(self.questionId, secondTextValue, firstTextValue)
 
     def append_item_to_other_test(self, test_name, german_value, english_value):
@@ -87,15 +99,23 @@ class EditTest:
         output_file = open(path, "w")
         items = self.test_manager.getAllItems(self.test_id)
         for item in items:
-            output_file.write(item[0] + " | " + item[1] + "\n")
+            if self.getDeToEn():
+                output_file.write(item[0] + " | " + item[1] + "\n")
+            else:
+                output_file.write(item[1] + " | " + item[0] + "\n")
         output_file.close()
         
     def getNextItem(self):
+        logging.info("{0}:{1}: testList size: {2}".format(self.logprefix, "getNextItem", len(self.testList)))
         if not self.testList:
+            logging.info("{0}:{1}: initializing testList".format(self.logprefix, "getNextItem"))
             self.testList = self.test_manager.getTestList(self.test_id)
             self.itemNumber = 0
         if self.itemNumber < len(self.testList):
-            (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber]
+            if self.getDeToEn():
+                (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber]
+            else:
+                (self.questionId, itemSecond, itemFirst) = self.testList[self.itemNumber]
             logging.info("{0}:{1}: list length: {2}, returning questionId: {3}, itemNumber: {4}".format(self.logprefix, 
                                                                                                         "getNextItem", 
                                                                                                         len(self.testList),
@@ -114,15 +134,15 @@ class EditTest:
         else:
             logging.info("{0}:{1}: error, end of list already reached".format(self.logprefix, "getNextItem"))
             return None
-        
+
     def getPreviousItem(self):
         self.itemNumber -= 1
         (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber - 1]
         if self.getDeToEn():
-            logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getNextItem", itemFirst, itemSecond))
+            logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getPreviousItem", itemFirst, itemSecond))
             return (itemFirst, itemSecond)
         else:
-            logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getNextItem", itemSecond, itemFirst))
+            logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getPreviousItem", itemSecond, itemFirst))
             return (itemSecond, itemFirst)
 
     def parse_file(self, path):
@@ -135,8 +155,13 @@ class EditTest:
             if(len(terms) != 2):
                 input_file.close()
                 return (-1, len(termsList) + 1)
-            terms[0] = terms[0].strip()
-            terms[1] = terms[1].strip()
+            if self.getDeToEn():
+                terms[0] = terms[0].strip()
+                terms[1] = terms[1].strip()
+            else:
+                terms0 = terms[0].strip()
+                terms[0] = terms[1].strip()
+                terms[1] = terms0
             logging.info("{0}:{1}: left term: {2}, right term: {3}".format(self.logprefix, "parse_file", terms[0], terms[1]))
             termsList.append(terms)    
         input_file.close()
