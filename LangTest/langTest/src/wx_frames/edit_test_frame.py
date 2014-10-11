@@ -156,6 +156,10 @@ class SelectOtherTestPopupWindow(wx.Frame):
         hbox.Add(wx.StaticText(self, label="    ", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         vbox.Add(hbox)
         vbox.AddSpacer(20)
+        button_cancel = wx.Button(self, -1, 'Cancel')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonCancelClicked, button_cancel)
+        vbox.Add(button_cancel, 1, flag=wx.CENTER)
+        vbox.AddSpacer(20)
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Raise()
@@ -197,6 +201,12 @@ class SelectOtherTestPopupWindow(wx.Frame):
                                                                               "OnButtonAppendClicked", 
                                                                               id(event.GetEventObject())))
         self.parent.append_item_to_other_test(self.button_to_test_name[id(event.GetEventObject())], self.german_value, self.english_value)
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+        
+    def OnButtonCancelClicked(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "OnButtonCancelClicked"))
         self.Unbind(wx.EVT_CLOSE)
         self.MakeModal(False)
         self.Close()

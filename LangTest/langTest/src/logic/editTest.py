@@ -73,7 +73,7 @@ class EditTest:
     def append_item_to_other_test(self, test_name, german_value, english_value):
         logging.info("{0}:{1}: appending".format(self.logprefix, "append_item_to_other_test"))
         self.test_manager.append_item_to_other_test(test_name, german_value, english_value)
-        self.delete_current_item()
+        self.edit_test_UI.clearAppendText()
         
     def delete_current_item(self):
         logging.info("{0}:{1}: deleting item number {2}".format(self.logprefix, "delete_current_item", self.itemNumber))
@@ -94,7 +94,6 @@ class EditTest:
         else:
             logging.error("{0}:{1}: error, unexpected use case".format(self.logprefix, "delete_current_item"))
         self.edit_test_UI.setNewEditTextAfterDelete(theItemListBoundsStatus)
-        self.edit_test_UI.clearAppendText()
         
     def getCurrentItem(self):
         (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber - 1]
