@@ -64,11 +64,10 @@ class TestManager:
             count = row[0]
         logging.info("{0}:{1}: test id: {2} has {3} items".format(self.logprefix, "getNumberOfItems", test_id, count))
         return count
-
-    def append_item(self, test_id, german_value, english_value):
-        logging.info("{0}:{1}: appending German: {2}, English: {3}".format(self.logprefix, "append_item", german_value, english_value))
-        found_test_name_to_values = dict()
+    
+    def check_status(self, test_id, german_value, english_value):
         ret_list = []
+        found_test_name_to_values = dict()
         self.cursor.execute("SELECT testId FROM testContents WHERE termLang1 = '" +  german_value 
                             + "' AND termLang2 = '" + english_value + "'")
         rows = self.cursor.fetchone()
@@ -92,12 +91,17 @@ class TestManager:
                     found_test_name_to_values.setdefault(self.get_test_name(row[0]), []).append(row[1])
             if(found_test_name_to_values):
                 ret_list.append((found_status.FoundStatus.EN_FOUND, found_test_name_to_values, german_value, english_value))
-        if ret_list:
-            return ret_list
-        self.cursor.execute("INSERT INTO testContents (testId, termLang1, termLang2) VALUES ('" 
-                            + str(test_id) + "','" + german_value + "','" + english_value + "')")
-        self.connect.commit()
-        ret_list.append((found_status.FoundStatus.NONE_FOUND, found_test_name_to_values, german_value, english_value))
+        return ret_list
+
+    def append_item(self, test_id, german_value, english_value):
+        logging.info("{0}:{1}: appending German: {2}, English: {3}".format(self.logprefix, "append_item", german_value, english_value))
+        ret_list = self.check_status(test_id, german_value, english_value)
+        if not ret_list:
+            found_test_name_to_values = dict()
+            self.cursor.execute("INSERT INTO testContents (testId, termLang1, termLang2) VALUES ('" 
+                                + str(test_id) + "','" + german_value + "','" + english_value + "')")
+            self.connect.commit()
+            ret_list.append((found_status.FoundStatus.NONE_FOUND, found_test_name_to_values, german_value, english_value))
         return ret_list
     
     def get_question_id(self, german_value, english_value):
@@ -116,15 +120,21 @@ class TestManager:
                             + str(self.get_test_id(test_name)) + "','" + german_value + "','" + english_value + "')")
         self.connect.commit()
         
-    def modify_question(self, questionId, firstTextValue, secondTextValue):
+    def modify_question(self, test_id, questionId, german_value, english_value):
         logging.info("{0}:{1}: changing to german_value: {2}, english_value: {3} for question id: {4}".format(self.logprefix, 
                                                                                                               "modify_question", 
-                                                                                                              firstTextValue,
-                                                                                                              secondTextValue,
+                                                                                                              german_value,
+                                                                                                              english_value,
                                                                                                               questionId))
-        self.cursor.execute("UPDATE testContents SET termLang1 = '" + firstTextValue + "', termLang2 = '" + secondTextValue \
-                            + "' WHERE questionId = '" + str(questionId) + "'")
-        self.connect.commit()
+        ret_list = self.check_status(test_id, german_value, english_value)
+        if not ret_list:
+            found_test_name_to_values = dict()
+            self.cursor.execute("UPDATE testContents SET termLang1 = '" + german_value + "', termLang2 = '" + english_value \
+                                + "' WHERE questionId = '" + str(questionId) + "'")
+            self.connect.commit()
+            ret_list.append((found_status.FoundStatus.NONE_FOUND, found_test_name_to_values, german_value, english_value))
+        return ret_list
+        
         
     def delete_test(self, test_id):
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")

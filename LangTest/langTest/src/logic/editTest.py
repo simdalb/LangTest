@@ -60,11 +60,14 @@ class EditTest:
         
     def modify_question(self, firstTextValue, secondTextValue):
         if self.getDeToEn():
-            self.testList[self.itemNumber - 1] = (self.questionId, firstTextValue, secondTextValue)
-            self.test_manager.modify_question(self.questionId, firstTextValue, secondTextValue)
+            ret_list = self.test_manager.modify_question(self.test_id, self.questionId, firstTextValue, secondTextValue)
+            if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
+                self.testList[self.itemNumber - 1] = (self.questionId, firstTextValue, secondTextValue)
         else:
-            self.testList[self.itemNumber - 1] = (self.questionId, secondTextValue, firstTextValue)
-            self.test_manager.modify_question(self.questionId, secondTextValue, firstTextValue)
+            self.test_manager.modify_question(self.test_id, self.questionId, secondTextValue, firstTextValue)
+            if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
+                self.testList[self.itemNumber - 1] = (self.questionId, secondTextValue, firstTextValue)
+        return ret_list
 
     def append_item_to_other_test(self, test_name, german_value, english_value):
         logging.info("{0}:{1}: appending".format(self.logprefix, "append_item_to_other_test"))
@@ -112,10 +115,7 @@ class EditTest:
             self.testList = self.test_manager.getTestList(self.test_id)
             self.itemNumber = 0
         if self.itemNumber < len(self.testList):
-            if self.getDeToEn():
-                (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber]
-            else:
-                (self.questionId, itemSecond, itemFirst) = self.testList[self.itemNumber]
+            (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber]
             logging.info("{0}:{1}: list length: {2}, returning questionId: {3}, itemNumber: {4}".format(self.logprefix, 
                                                                                                         "getNextItem", 
                                                                                                         len(self.testList),

@@ -145,15 +145,37 @@ class SelectOtherTestPopupWindow(wx.Frame):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         hbox.Add(wx.StaticText(self, label="    ", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         vbox2 = wx.BoxSizer(wx.VERTICAL)
-        (the_found_status, found_test_name_to_values, self.german_value, self.english_value) = ret_list[0]
         self.button_to_test_name = dict()
+        (the_found_status, found_test_name_to_values, self.german_value, self.english_value) = ret_list[0]
+        self.addFoundTestList(vbox2, the_found_status, found_test_name_to_values, True)
+        if len(ret_list) == 2:
+            (the_found_status, found_test_name_to_values, self.german_value, self.english_value) = ret_list[1]
+            self.addFoundTestList(vbox2, the_found_status, found_test_name_to_values, True)
+        hbox.Add(vbox2)
+        hbox.Add(wx.StaticText(self, label="    ", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        vbox.Add(hbox)
+        vbox.AddSpacer(20)
+        self.SetSizerAndFit(vbox)
+        self.Centre()
+        self.Raise()
+        self.MakeModal(True)
+        self.Show()
+        
+    def addFoundTestList(self, vbox, the_found_status, found_test_name_to_values, DE_exp):
         if the_found_status == found_status.FoundStatus.DE_FOUND:
-            vbox2.Add(wx.StaticText(self, id=-1, label="\nThe German expression", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-            vbox2.Add(wx.StaticText(self, id=-1, label="'" + self.german_value + "'", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-            vbox2.Add(wx.StaticText(self, id=-1, label="has been found elsewhere. Please choose a test to append your item to.", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+            if DE_exp:
+                vbox.Add(wx.StaticText(self, id=-1, label="\nThe German expression", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+                vbox.Add(wx.StaticText(self, id=-1, label="'" + self.german_value + "'", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+            else:
+                vbox.Add(wx.StaticText(self, id=-1, label="\nThe English expression", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+                vbox.Add(wx.StaticText(self, id=-1, label="'" + self.english_value + "'", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+            vbox.Add(wx.StaticText(self, id=-1, label="has been found elsewhere. Please choose a test to append your item to.", style=wx.ALIGN_CENTER), flag=wx.CENTER)
             grid = wx.FlexGridSizer(len(found_test_name_to_values) + 1, 3, hgap=50)
             grid.Add(wx.StaticText(self, id=-1, label="\nTest name", style=wx.ALIGN_CENTER))
-            grid.Add(wx.StaticText(self, id=-1, label="\nEnglish translations", style=wx.ALIGN_CENTER))
+            if DE_exp:
+                grid.Add(wx.StaticText(self, id=-1, label="\nEnglish translations", style=wx.ALIGN_CENTER))
+            else:
+                grid.Add(wx.StaticText(self, id=-1, label="\nGerman translations", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
             for test_name in found_test_name_to_values:
                 grid.Add(wx.StaticText(self, id=-1, label=test_name, style=wx.ALIGN_CENTER))
@@ -167,40 +189,8 @@ class SelectOtherTestPopupWindow(wx.Frame):
                 logging.info("{0}:{1}: append button has id: {2}".format(self.logprefix, "start", id(button_append)))
                 self.button_to_test_name[id(button_append)] = test_name
                 grid.Add(button_append)
-            vbox2.Add(grid, flag=wx.CENTER)
-        if len(ret_list) == 2:
-            (the_found_status, found_test_name_to_values, self.german_value, self.english_value) = ret_list[1]
-            if the_found_status == found_status.FoundStatus.EN_FOUND:
-                vbox2.Add(wx.StaticText(self, id=-1, label="\nThe English expression", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-                vbox2.Add(wx.StaticText(self, id=-1, label="'" + self.english_value + "'", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-                vbox2.Add(wx.StaticText(self, id=-1, label="\nhas been found elsewhere. Please choose a test to append your item to.", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-                grid = wx.FlexGridSizer(len(found_test_name_to_values) + 1, 3, hgap=50)
-                grid.Add(wx.StaticText(self, id=-1, label="\nTest name", style=wx.ALIGN_CENTER))
-                grid.Add(wx.StaticText(self, id=-1, label="\nGerman translations", style=wx.ALIGN_CENTER))
-                grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
-                for test_name in found_test_name_to_values:
-                    grid.Add(wx.StaticText(self, id=-1, label=test_name, style=wx.ALIGN_CENTER))
-                    found_values = found_test_name_to_values[test_name]
-                    found_values_string = ""
-                    for found_value in found_values:
-                        found_values_string += "'" + found_value + "'\n"
-                    grid.Add(wx.StaticText(self, id=-1, label=found_values_string, style=wx.ALIGN_CENTER))
-                    button_append = wx.Button(self, -1, 'Append')
-                    self.Bind(wx.EVT_BUTTON, self.OnButtonAppendClicked, button_append)
-                    logging.info("{0}:{1}: append button has id: {2}".format(self.logprefix, "start", id(button_append)))
-                    self.button_to_test_name[id(button_append)] = test_name
-                    grid.Add(button_append)
-                vbox2.Add(grid)
-        hbox.Add(vbox2)
-        hbox.Add(wx.StaticText(self, label="    ", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-        vbox.Add(hbox)
-        vbox.AddSpacer(20)
-        self.SetSizerAndFit(vbox)
-        self.Centre()
-        self.Raise()
-        self.MakeModal(True)
-        self.Show()
-        
+            vbox.Add(grid, flag=wx.CENTER)
+            
     def OnButtonAppendClicked(self, event):
         logging.info("{0}:{1}: append button with id: {2} was clicked".format(self.logprefix, 
                                                                               "OnButtonAppendClicked", 
@@ -364,8 +354,14 @@ class EditTestFrame(wx.Frame):
             self.button_save_item.Enable()
         
     def OnButtonSaveClicked(self, event):
-        self.editTest.modify_question(self.firstEditText.GetValue(), self.secondEditText.GetValue())
-        self.button_save_item.Disable()
+        ret_list = self.editTest.modify_question(self.firstEditText.GetValue(), self.secondEditText.GetValue())
+        the_found_status = ret_list[0][0]
+        logging.info("{0}:{1}: found status: {2}".format(self.logprefix, "OnAppendClick", the_found_status))
+        if the_found_status == found_status.FoundStatus.NONE_FOUND:
+            self.button_save_item.Disable()
+        else:
+            self.process_ret_list(ret_list)
+#            if another test selected, remove from this test
         
     def OnButtonPreviousClicked(self, event):
         logging.info("{0}:{1}:".format(self.logprefix, "OnButtonPreviousClicked"))
@@ -423,25 +419,27 @@ class EditTestFrame(wx.Frame):
             self.editTest.inform_no_empty_fields()
         else:
             ret_list = self.editTest.append_item(firstAppendTextValue, secondAppendTextValue)
-            self.process_ret_list(ret_list)
+            the_found_status = ret_list[0][0]
+            if the_found_status == found_status.FoundStatus.NONE_FOUND:
+                if not self.fully_enabled:
+                    self.button_switch.Enable()
+                    self.input_search_term.Enable()
+                    self.button_search.Enable()
+                    self.button_export.Enable()
+                    self.button_start_test.Enable()
+                    self.fully_enabled = True
+                logging.info("{0}:{1}: Number of items: {2}".format(self.logprefix, "OnAppendClick", self.editTest.getNumberOfItems()))
+                self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
+                self.clearAppendText()
+                if not self.button_next_item.IsEnabled():
+                    self.button_next_item.Enable()
+            else:
+                self.process_ret_list(ret_list)
             
     def process_ret_list(self, ret_list):
         the_found_status = ret_list[0][0]
         logging.info("{0}:{1}: found status: {2}".format(self.logprefix, "OnAppendClick", the_found_status))
-        if the_found_status == found_status.FoundStatus.NONE_FOUND:
-            if not self.fully_enabled:
-                self.button_switch.Enable()
-                self.input_search_term.Enable()
-                self.button_search.Enable()
-                self.button_export.Enable()
-                self.button_start_test.Enable()
-                self.fully_enabled = True
-            logging.info("{0}:{1}: Number of items: {2}".format(self.logprefix, "OnAppendClick", self.editTest.getNumberOfItems()))
-            self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
-            self.clearAppendText()
-            if not self.button_next_item.IsEnabled():
-                self.button_next_item.Enable()
-        elif the_found_status == found_status.FoundStatus.BOTH_FOUND:
+        if the_found_status == found_status.FoundStatus.BOTH_FOUND:
             found_test_name = ret_list[0][1].keys()[0]
             if self.editTest.getDeToEn():
                 self.editTest.inform_item_exists(found_test_name, ret_list[0][2], ret_list[0][3])
