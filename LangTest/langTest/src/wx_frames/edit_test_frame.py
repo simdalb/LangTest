@@ -2,6 +2,7 @@
 import wx
 import logging
 from common import found_status
+from common import item_list_bounds_status
 
 class PromptDeleteTestPopupWindow(wx.Frame):
     def __init__(self, parent):
@@ -242,18 +243,22 @@ class EditTestFrame(wx.Frame):
         self.Bind(wx.EVT_TEXT, self.OnEditTextChanged, self.secondEditText)
         grid.Add(self.firstEditText, flag=wx.CENTER)
         grid.Add(self.secondEditText, flag=wx.CENTER)
-        grid2 = wx.FlexGridSizer(2, 2, hgap=10, vgap=10)
+        grid2 = wx.FlexGridSizer(2, 3, hgap=10, vgap=10)
         self.button_next_item = wx.Button(self, -1, label='Show first item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonNextClicked, self.button_next_item)
         self.button_previous_item = wx.Button(self, -1, label='Show previous item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonPreviousClicked, self.button_previous_item)
+        self.button_delete_item = wx.Button(self, -1, label='Delete item')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonDeleteItemClicked, self.button_delete_item)
         self.button_save_item = wx.Button(self, -1, label='Save modified item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonSaveClicked, self.button_save_item)
         self.button_shift_item = wx.Button(self, -1, label='Move item\nto another test')
         grid2.Add(self.button_next_item, flag=wx.CENTER)
         grid2.Add(self.button_previous_item, flag=wx.CENTER)
+        grid2.Add(wx.StaticText(self, label=""), flag=wx.CENTER)
         grid2.Add(self.button_save_item, flag=wx.CENTER)
         grid2.Add(self.button_shift_item, flag=wx.CENTER)
+        grid2.Add(self.button_delete_item, flag=wx.CENTER)
         grid.Add(grid2, flag=wx.CENTER)
         vbox.Add(grid, flag=wx.CENTER)
         vbox.Add(wx.StaticText(self, label='\nSearch for an item in the test:\n'), flag=wx.CENTER)
@@ -304,13 +309,13 @@ class EditTestFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnButtonExportClicked, self.button_export)
         button_delete = wx.Button(self, -1, 'Delete test')
         self.Bind(wx.EVT_BUTTON, self.OnButtonDeleteTestClicked, button_delete)
-        hbox2.Add((270,-1))
+        hbox2.Add((340,-1))
         hbox2.Add(button_import, flag=wx.CENTER)
         hbox2.Add((30,-1))
         hbox2.Add(self.button_export, flag=wx.CENTER)
         hbox2.Add((30,-1))
         hbox2.Add(button_delete, flag=wx.CENTER)
-        hbox2.Add((270,-1))
+        hbox2.Add((340,-1))
         vbox.Add(hbox2, flag=wx.ALIGN_CENTER)
         vbox.AddSpacer(60)
         hbox3 = wx.BoxSizer(wx.HORIZONTAL)
@@ -332,6 +337,7 @@ class EditTestFrame(wx.Frame):
         self.button_previous_item.Disable()
         self.button_save_item.Disable()
         self.button_shift_item.Disable()
+        self.button_delete_item.Disable()
         self.firstEditText.Disable()
         self.secondEditText.Disable()
         if not self.editTest.getNumberOfItems():
@@ -344,6 +350,10 @@ class EditTestFrame(wx.Frame):
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
+        
+    def OnButtonDeleteItemClicked(self, event):
+        self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
+        self.editTest.delete_current_item()
         
     def OnEditTextChanged(self, event):
         if not self.ignore_edit_text_changed == 0:
@@ -361,7 +371,6 @@ class EditTestFrame(wx.Frame):
             self.button_save_item.Disable()
         else:
             self.process_ret_list(ret_list)
-#            if another test selected, remove from this test
         
     def OnButtonPreviousClicked(self, event):
         logging.info("{0}:{1}:".format(self.logprefix, "OnButtonPreviousClicked"))
@@ -391,6 +400,7 @@ class EditTestFrame(wx.Frame):
             logging.info("{0}:{1}: enabling other buttons".format(self.logprefix, "OnButtonNextClicked"))
             self.button_next_item.SetLabel("Show next item")
             self.button_shift_item.Enable()
+            self.button_delete_item.Enable()
             self.firstEditText.Enable()
             self.secondEditText.Enable()
         self.ignore_edit_text_changed = 2
@@ -447,6 +457,38 @@ class EditTestFrame(wx.Frame):
                 self.editTest.inform_item_exists(found_test_name, ret_list[0][3], ret_list[0][2])
         else:
             self.editTest.select_other_test(ret_list)
+            
+    def setNewEditTextAfterDelete(self, theItemListBoundsStatus):
+        self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
+        self.ignore_edit_text_changed = 2
+        if not theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.EMPTY:
+            logging.info("{0}:{1}: list is not empty".format(self.logprefix, "setNewEditTextAfterDelete"))
+            item = self.editTest.getCurrentItem()
+            self.firstEditText.SetValue(item[0])
+            self.secondEditText.SetValue(item[1])
+        else:
+            logging.info("{0}:{1}: list is empty".format(self.logprefix, "setNewEditTextAfterDelete"))
+            self.firstEditText.Clear()
+            self.secondEditText.Clear()
+            self.firstEditText.Disable()
+            self.secondEditText.Disable()
+        if theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.BOTH:
+            self.button_previous_item.Disable()
+            self.button_next_item.Disable()
+        if theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.EMPTY:
+            self.button_previous_item.Disable()
+            self.button_next_item.Disable()
+            self.button_shift_item.Disable()
+            self.button_delete_item.Disable()
+        elif theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.END:
+            self.button_previous_item.Enable()
+            self.button_next_item.Disable()
+        elif theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.BEGIN:
+            self.button_previous_item.Disable()
+            self.button_next_item.Enable()
+        elif theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.NEITHER:
+            self.button_previous_item.Enable()
+            self.button_next_item.Enable()
                 
     def clearAppendText(self):
         self.firstAppendText.Clear()

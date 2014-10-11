@@ -109,6 +109,10 @@ class TestManager:
                             + "' AND termLang2 = '" + english_value + "'")
         row = self.cursor.fetchone()
         return row[0]
+    
+    def delete_item(self, questionId):
+        self.cursor.execute("DELETE FROM testContents WHERE questionId = '" + str(questionId) + "'")
+        self.connect.commit()
 
     def append_item_to_other_test(self, test_name, german_value, english_value):
         logging.info("{0}:{1}: appending german_value: {2}, english_value: {3} to test: {4}".format(self.logprefix, 
@@ -134,7 +138,7 @@ class TestManager:
             self.connect.commit()
             ret_list.append((found_status.FoundStatus.NONE_FOUND, found_test_name_to_values, german_value, english_value))
         return ret_list
-        
+
         
     def delete_test(self, test_id):
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")

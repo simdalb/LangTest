@@ -1,6 +1,7 @@
 
 import logging
 from common import found_status
+from common import item_list_bounds_status
 
 class EditTest:
     def __init__(self, manager, UI_factory, test_manager, persistency_manager, user_name, user_id, test_name, test_id):
@@ -72,7 +73,39 @@ class EditTest:
     def append_item_to_other_test(self, test_name, german_value, english_value):
         logging.info("{0}:{1}: appending".format(self.logprefix, "append_item_to_other_test"))
         self.test_manager.append_item_to_other_test(test_name, german_value, english_value)
+        self.delete_current_item()
+        
+    def delete_current_item(self):
+        logging.info("{0}:{1}: deleting item number {2}".format(self.logprefix, "delete_current_item", self.itemNumber))
+        self.test_manager.delete_item(self.questionId)
+        self.testList.pop(self.itemNumber - 1)
+        if len(self.testList) == self.itemNumber - 1:
+            self.itemNumber -= 1
+        theItemListBoundsStatus = item_list_bounds_status.ItemListBoundsStatus.NEITHER
+        if len(self.testList) == 0:
+            theItemListBoundsStatus = item_list_bounds_status.ItemListBoundsStatus.EMPTY
+        elif len(self.testList) == 1:
+            theItemListBoundsStatus = item_list_bounds_status.ItemListBoundsStatus.BOTH
+            self.itemNumber = 1
+        elif len(self.testList) == self.itemNumber:
+            theItemListBoundsStatus = item_list_bounds_status.ItemListBoundsStatus.END
+        elif self.itemNumber == 1:
+            theItemListBoundsStatus = item_list_bounds_status.ItemListBoundsStatus.BEGIN
+        else:
+            logging.error("{0}:{1}: error, unexpected use case".format(self.logprefix, "delete_current_item"))
+        self.edit_test_UI.setNewEditTextAfterDelete(theItemListBoundsStatus)
         self.edit_test_UI.clearAppendText()
+        
+    def getCurrentItem(self):
+        (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber - 1]
+        item = []
+        if self.getDeToEn():
+            item.append(itemFirst)
+            item.append(itemSecond)
+        else:
+            item.append(itemSecond)
+            item.append(itemFirst)
+        return item
 
     def inform_item_exists(self, found_test_name, firstAppendTextValue, secondAppendTextValue):
         self.UI_factory.create_InformItemExistsPopupWindow(self.edit_test_UI).start(found_test_name, 
