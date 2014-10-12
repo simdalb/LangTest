@@ -41,6 +41,9 @@ class UIFactoryWXPython:
 	def create_PromptDeleteTestPopupWindow(self, parent):
 		return edit_test_frame.PromptDeleteTestPopupWindow(parent)
 	
+	def create_SelectItemPopupWindow(self, parent):
+		return edit_test_frame.SelectItemPopupWindow(parent)
+	
 	def getPathForImportFileDialog(self, parent):
 		openFileDialog = wx.FileDialog(parent, style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 		openFileDialog.ShowModal()

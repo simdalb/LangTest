@@ -4,11 +4,70 @@ import logging
 from common import found_status
 from common import item_list_bounds_status
 
+class SelectItemPopupWindow(wx.Frame):
+    def __init__(self, parent):
+        self.logprefix = "SelectItemPopupWindow"
+        super(SelectItemPopupWindow, self).__init__(parent, size=(300, 160))
+
+    def start(self, matches, parent):
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
+        self.parent = parent
+        self.matches = matches
+        self.Bind(wx.EVT_CLOSE, self.when_closed)
+        self.SetBackgroundColour('WHITE')
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.Add(wx.StaticText(self, label='    '), flag=wx.CENTER)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        logging.info("{0}:{1}: found {2} matches".format(self.logprefix, "start", len(matches)))
+        if matches:
+            match_list = []
+            for match in matches:
+                match_list.append(match[1] + " | " + match[2])
+            vbox.Add(wx.StaticText(self, label='\nDouble click a match:\n'), flag=wx.CENTER)
+            match_list_box = wx.ListBox(self, choices=match_list)
+            self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnListItemDClicked, match_list_box)
+            vbox.Add(match_list_box, 1, flag=wx.CENTER)
+            vbox.Add(wx.StaticText(self, style=wx.ALIGN_CENTER), flag=wx.CENTER)
+            button_cancel = wx.Button(self, -1, 'Cancel')
+            self.Bind(wx.EVT_BUTTON, self.OnButtonCancelClicked, button_cancel)
+            vbox.Add(button_cancel, flag=wx.CENTER)
+        else:
+            vbox.Add(wx.StaticText(self, label='\nNo results found\n'), flag=wx.CENTER)
+            button_OK = wx.Button(self, -1, 'OK')
+            self.Bind(wx.EVT_BUTTON, self.OnButtonCancelClicked, button_OK)
+            vbox.Add(button_OK, 1, flag=wx.CENTER)
+        vbox.Add(wx.StaticText(self, style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        hbox.Add(vbox, flag=wx.CENTER)
+        hbox.Add(wx.StaticText(self, label='    '), flag=wx.CENTER)
+        self.SetSizerAndFit(hbox)
+        self.Centre()
+        self.Raise()
+        self.MakeModal(True)
+        self.Show()
+
+    def OnListItemDClicked(self, event):
+        logging.info("{0}:{1}: user clicked string: {2}".format(self.logprefix, "OnListItemDClicked", event.GetString()))
+        questionId = self.matches[event.GetSelection()][0]
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.parent.set_question(questionId)
+        self.Close()
+
+    def OnButtonCancelClicked(self, event):
+        logging.info("{0}:{1}: user clicked cancel".format(self.logprefix, "OnButtonCancelClicked"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+
+    def when_closed(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "when_closed"))
+        self.OnButtonCancelClicked(event)
+
 class PromptDeleteTestPopupWindow(wx.Frame):
     def __init__(self, parent):
         self.logprefix = "PromptDeleteTestPopupWindow"
         super(PromptDeleteTestPopupWindow, self).__init__(parent, size=(300, 160))
-    
+
     def start(self, test_name, parent):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.parent = parent
@@ -394,8 +453,11 @@ class EditTestFrame(wx.Frame):
         self.ignore_edit_text_changed = 2
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
+        self.setButtonsOnPrevious()
+        
+    def setButtonsOnPrevious(self):
         if not self.editTest.isNotFirstItem():
-            logging.info("{0}:{1}: beginning reached".format(self.logprefix, "OnButtonPreviousClicked"))
+            logging.info("{0}:{1}: beginning reached".format(self.logprefix, "setButtonsOnPrevious"))
             self.button_previous_item.Disable()
         if not self.button_next_item.IsEnabled():
             self.button_next_item.Enable()
@@ -407,22 +469,33 @@ class EditTestFrame(wx.Frame):
         logging.info("{0}:{1}: is_end: {2}".format(self.logprefix, "OnButtonNextClicked", is_end))
         firstEditTextIsEnabled = self.firstEditText.Enabled
         logging.info("{0}:{1}: firstEditTextIsEnabled: {2}, isNotFirstItem: {3}".format(self.logprefix, "OnButtonNextClicked", firstEditTextIsEnabled, self.editTest.isNotFirstItem()))
+        self.ignore_edit_text_changed = 2
+        self.firstEditText.SetValue(itemFirst)
+        self.secondEditText.SetValue(itemSecond)
+        self.setButtonsOnNext(is_end)
+        
+    def setButtonsOnNext(self, is_end):
         if self.editTest.isNotFirstItem():
-            logging.info("{0}:{1}: enabling previous item buttons".format(self.logprefix, "OnButtonNextClicked"))
+            logging.info("{0}:{1}: enabling previous item buttons".format(self.logprefix, "setButtonsOnNext"))
             self.button_next_item.SetLabel("Show next item")
             self.button_previous_item.Enable()
         if not self.firstEditText.Enabled:
-            logging.info("{0}:{1}: enabling other buttons".format(self.logprefix, "OnButtonNextClicked"))
+            logging.info("{0}:{1}: enabling other buttons".format(self.logprefix, "setButtonsOnNext"))
             self.button_next_item.SetLabel("Show next item")
             self.button_shift_item.Enable()
             self.button_delete_item.Enable()
             self.firstEditText.Enable()
             self.secondEditText.Enable()
+        if is_end:
+            self.button_next_item.Disable()
+            
+    def set_item(self, is_end, itemFirst, itemSecond):
+        self.Raise()
         self.ignore_edit_text_changed = 2
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
-        if is_end:
-            self.button_next_item.Disable()
+        self.setButtonsOnPrevious()
+        self.setButtonsOnNext(is_end)
         
     def OnButtonExportClicked(self, event):
         path = self.editTest.export_test()
@@ -536,7 +609,8 @@ class EditTestFrame(wx.Frame):
         self.secondEditText.SetValue(firstEditTextValue)
         
     def OnButtonSearchClicked(self, event):
-        logging.info("{0}:{1}: user clicked search".format(self.logprefix, "OnButtonSearchClicked"))
+        logging.info("{0}:{1}: user clicked search for {2}".format(self.logprefix, "OnButtonSearchClicked", self.input_search_term.GetValue()))
+        self.editTest.searchExpression(self.input_search_term.GetValue())
 
     def OnButtonQuitClicked(self, event):
         logging.info("{0}:{1}: user clicked quit".format(self.logprefix, "OnButtonQuitClicked"))

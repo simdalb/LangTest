@@ -147,12 +147,15 @@ class EditTest:
                 output_file.write(item[1] + " | " + item[0] + "\n")
         output_file.close()
         
-    def getNextItem(self):
-        logging.info("{0}:{1}: testList size: {2}".format(self.logprefix, "getNextItem", len(self.testList)))
+    def setTestList(self):
         if not self.testList:
             logging.info("{0}:{1}: initializing testList".format(self.logprefix, "getNextItem"))
             self.testList = self.test_manager.getTestList(self.test_id)
             self.itemNumber = 0
+        
+    def getNextItem(self):
+        logging.info("{0}:{1}: testList size: {2}".format(self.logprefix, "getNextItem", len(self.testList)))
+        self.setTestList()
         if self.itemNumber < len(self.testList):
             (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber]
             logging.info("{0}:{1}: list length: {2}, returning questionId: {3}, itemNumber: {4}".format(self.logprefix, 
@@ -183,6 +186,34 @@ class EditTest:
         else:
             logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "getPreviousItem", itemSecond, itemFirst))
             return (itemSecond, itemFirst)
+        
+    def searchExpression(self, expr):
+        matches = self.test_manager.getMatches(expr, self.test_id)
+        logging.info("{0}:{1}: found {2} items for expression: {3}".format(self.logprefix, "searchExpression", len(matches), expr))
+        if not self.getDeToEn():
+            for item in matches:
+                item1 = ''.join(item[1])
+                item[1] = ''.join(item[2])
+                item[2] = item1
+        self.UI_factory.create_SelectItemPopupWindow(self.edit_test_UI).start(matches, self)
+        
+    def set_question(self, questionId):
+        self.setTestList()
+        self.itemNumber = 1
+        logging.info("{0}:{1}: searching for questionId: {2}".format(self.logprefix, "set_question", questionId))
+        while not questionId == self.testList[self.itemNumber - 1][0]:
+            logging.info("{0}:{1}: questionId: {2}".format(self.logprefix, "set_question", self.testList[self.itemNumber - 1][0]))
+            self.itemNumber += 1
+        (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber - 1]
+        is_end = False
+        if self.itemNumber == len(self.testList):
+            is_end = True
+        if self.getDeToEn():
+            logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "set_question", itemFirst, itemSecond))
+            self.edit_test_UI.set_item(is_end, itemFirst, itemSecond)
+        else:
+            logging.info("{0}:{1}: returning {2}, {3}".format(self.logprefix, "set_question", itemSecond, itemFirst))
+            self.edit_test_UI.set_item(is_end, itemSecond, itemFirst)
 
     def parse_file(self, path):
         input_file = open(path, "r")

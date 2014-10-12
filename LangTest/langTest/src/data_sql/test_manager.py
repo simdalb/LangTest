@@ -139,6 +139,11 @@ class TestManager:
             ret_list.append((found_status.FoundStatus.NONE_FOUND, found_test_name_to_values, german_value, english_value))
         return ret_list
 
+    def getMatches(self, expr, testId):
+        logging.info("{0}:{1}: searching for expression: {2} in testId: {3}".format(self.logprefix, "getMatches", expr, testId))
+        self.cursor.execute("SELECT questionId, termLang1, termLang2 FROM testContents WHERE (termLang1 LIKE '%" + expr 
+                            + "%' OR termLang2 LIKE '%" + expr + "%') AND testId = '" + str(testId) + "'")
+        return self.cursor.fetchall()
         
     def delete_test(self, test_id):
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
