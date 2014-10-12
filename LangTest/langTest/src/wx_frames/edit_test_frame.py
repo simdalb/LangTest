@@ -290,7 +290,11 @@ class EditTestFrame(wx.Frame):
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox_info = wx.BoxSizer(wx.HORIZONTAL)
         hbox_info.Add(wx.StaticText(self, label='\nTest:  ' + self.editTest.getTestName()), flag=wx.CENTER)
-        hbox_info.Add(wx.StaticText(self, label='\n                                                   '), flag=wx.CENTER)
+        hbox_info.Add(wx.StaticText(self, label='\n                                               '), flag=wx.CENTER)
+        self.nItems_text = wx.StaticText(self, label='\nNumber of items: {0}'.format(self.editTest.getNumberOfItems()))
+        hbox_info.Add(self.nItems_text, flag=wx.CENTER)
+        hbox_info.Add(wx.StaticText(self, label='\n                                               '), flag=wx.CENTER)
+        hbox_info.Add(wx.StaticText(self, label='\n                                               '), flag=wx.CENTER)
         hbox_info.Add(wx.StaticText(self, label='\nUser:  ' + self.editTest.getUserName()), flag=wx.CENTER)
         vbox.Add(hbox_info, flag=wx.CENTER)
         vbox.Add(wx.StaticText(self, label='\nView and edit items:\n'), flag=wx.CENTER)
@@ -322,6 +326,7 @@ class EditTestFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnButtonNextClicked, self.button_next_item)
         self.button_previous_item = wx.Button(self, -1, label='Show previous item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonPreviousClicked, self.button_previous_item)
+        self.itemNumber_text = wx.StaticText(self, label='', style=wx.ALIGN_LEFT)
         self.button_delete_item = wx.Button(self, -1, label='Delete item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonDeleteItemClicked, self.button_delete_item)
         self.button_save_item = wx.Button(self, -1, label='Save modified item')
@@ -329,7 +334,7 @@ class EditTestFrame(wx.Frame):
         self.button_shift_item = wx.Button(self, -1, label='Move item\nto another test')
         grid2.Add(self.button_next_item, flag=wx.CENTER)
         grid2.Add(self.button_previous_item, flag=wx.CENTER)
-        grid2.Add(wx.StaticText(self, label=""), flag=wx.CENTER)
+        grid2.Add(self.itemNumber_text, flag=wx.CENTER)
         grid2.Add(self.button_save_item, flag=wx.CENTER)
         grid2.Add(self.button_shift_item, flag=wx.CENTER)
         grid2.Add(self.button_delete_item, flag=wx.CENTER)
@@ -370,10 +375,7 @@ class EditTestFrame(wx.Frame):
         grid2.Add(self.firstAppendText, flag=wx.CENTER)
         grid2.Add(self.secondAppendText, flag=wx.CENTER)
         grid2.Add(self.button_append_item, flag=wx.CENTER)
-        self.nItems_text = wx.StaticText(self, 
-                                         label='Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()), 
-                                         style=wx.ALIGN_LEFT)
-        grid2.Add(self.nItems_text, flag=wx.ALIGN_LEFT)
+        grid2.Add(wx.StaticText(self, style=wx.ALIGN_LEFT), flag=wx.ALIGN_LEFT)
         vbox.Add(grid2, flag=wx.CENTER)
         vbox.Add(wx.StaticText(self, label='\nMultiple item operations:\n'), flag=wx.CENTER)
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -426,8 +428,8 @@ class EditTestFrame(wx.Frame):
         self.Show()
         
     def OnButtonDeleteItemClicked(self, event):
-        self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
         self.editTest.delete_current_item()
+        self.setNumberItemsText()
         
     def OnEditTextChanged(self, event):
         if not self.ignore_edit_text_changed == 0:
@@ -454,6 +456,7 @@ class EditTestFrame(wx.Frame):
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
         self.setButtonsOnPrevious()
+        self.setNumberItemsText()
         
     def setButtonsOnPrevious(self):
         if not self.editTest.isNotFirstItem():
@@ -473,6 +476,7 @@ class EditTestFrame(wx.Frame):
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
         self.setButtonsOnNext(is_end)
+        self.setNumberItemsText()
         
     def setButtonsOnNext(self, is_end):
         if self.editTest.isNotFirstItem():
@@ -491,11 +495,13 @@ class EditTestFrame(wx.Frame):
             
     def set_item(self, is_end, itemFirst, itemSecond):
         self.Raise()
+        self.button_save_item.Disable()
         self.ignore_edit_text_changed = 2
         self.firstEditText.SetValue(itemFirst)
         self.secondEditText.SetValue(itemSecond)
         self.setButtonsOnPrevious()
         self.setButtonsOnNext(is_end)
+        self.setNumberItemsText()
         
     def OnButtonExportClicked(self, event):
         path = self.editTest.export_test()
@@ -506,6 +512,7 @@ class EditTestFrame(wx.Frame):
         path = self.editTest.import_test()
         logging.info("{0}:{1}: user entered path: {2}".format(self.logprefix, "OnButtonImportClicked", path))
         self.editTest.parse_file(path)
+        self.setNumberItemsText()
         
     def OnButtonDeleteTestClicked(self, event):
         self.editTest.prompt_delete_test()
@@ -527,7 +534,7 @@ class EditTestFrame(wx.Frame):
                     self.button_start_test.Enable()
                     self.fully_enabled = True
                 logging.info("{0}:{1}: Number of items: {2}".format(self.logprefix, "OnAppendClick", self.editTest.getNumberOfItems()))
-                self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
+                self.setNumberItemsText()
                 self.clearAppendText()
                 if not self.button_next_item.IsEnabled():
                     self.button_next_item.Enable()
@@ -546,8 +553,15 @@ class EditTestFrame(wx.Frame):
         else:
             self.editTest.select_other_test(ret_list)
             
+    def setNumberItemsText(self):
+        if self.editTest.getItemNumber() > 0 and self.editTest.getNumberOfItems() > 0:
+            self.itemNumber_text.SetLabel('Item number {0}\n'.format(self.editTest.getItemNumber()))
+        else:
+            self.itemNumber_text.SetLabel('')
+        self.nItems_text.SetLabel('\nNumber of items: {0}'.format(self.editTest.getNumberOfItems()))
+            
     def setNewEditTextAfterDelete(self, theItemListBoundsStatus):
-        self.nItems_text.SetLabel('Number of items\n      in test: {0}\n'.format(self.editTest.getNumberOfItems()))
+        self.setNumberItemsText()
         self.ignore_edit_text_changed = 2
         if not theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.EMPTY:
             logging.info("{0}:{1}: list is not empty".format(self.logprefix, "setNewEditTextAfterDelete"))

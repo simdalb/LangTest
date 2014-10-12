@@ -147,6 +147,9 @@ class EditTest:
                 output_file.write(item[1] + " | " + item[0] + "\n")
         output_file.close()
         
+    def getItemNumber(self):
+        return self.itemNumber
+        
     def setTestList(self):
         if not self.testList:
             logging.info("{0}:{1}: initializing testList".format(self.logprefix, "getNextItem"))
