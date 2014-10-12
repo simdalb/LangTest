@@ -26,6 +26,12 @@ class EditTest:
     def getDeToEn(self):
         return self.persistency_manager.getDeToEn(self.user_id)
     
+    def getUserName(self):
+        return self.user_name
+    
+    def getTestName(self):
+        return self.test_name
+    
     def getNumberOfItems(self):
         return self.test_manager.getNumberOfItems(self.test_id)
     
@@ -123,6 +129,7 @@ class EditTest:
         
     def delete_test(self):
         self.test_manager.delete_test(self.test_id)
+        self.edit_test_UI.goBackToTestSelection()
         
     def import_test(self):
         return self.UI_factory.getPathForImportFileDialog(self.edit_test_UI)
