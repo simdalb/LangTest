@@ -452,6 +452,7 @@ class EditTestFrame(wx.Frame):
         grid2 = wx.FlexGridSizer(2, 3, hgap=10, vgap=10)
         self.button_next_item = wx.Button(self, -1, label='Show first item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonNextClicked, self.button_next_item)
+        self.nextItemButtonLabelSet = False
         self.button_previous_item = wx.Button(self, -1, label='Show previous item')
         self.Bind(wx.EVT_BUTTON, self.OnButtonPreviousClicked, self.button_previous_item)
         self.itemNumber_text = wx.StaticText(self, label='', style=wx.ALIGN_LEFT)
@@ -560,9 +561,7 @@ class EditTestFrame(wx.Frame):
         
     def OnButtonMoveItemClicked(self, event):
         self.editTest.move_current_item()
-        if self.editTest.getNumberOfItems() == 0:
-            self.input_search_term.Disable()
-            self.button_search.Disable()
+        logging.info("{0}:{1}: number of items is now: {2}".format(self.logprefix, "OnButtonMoveItemClicked", self.editTest.getNumberOfItems()))
         self.setNumberItemsText()
         
     def OnButtonDeleteItemClicked(self, event):
@@ -622,11 +621,15 @@ class EditTestFrame(wx.Frame):
     def setButtonsOnNext(self, is_end):
         if self.editTest.isNotFirstItem():
             logging.info("{0}:{1}: enabling previous item buttons".format(self.logprefix, "setButtonsOnNext"))
-            self.button_next_item.SetLabel("Show next item")
+            if not self.nextItemButtonLabelSet:
+                self.button_next_item.SetLabel("Show next item")
+                self.nextItemButtonLabelSet = True
             self.button_previous_item.Enable()
         if not self.firstEditText.Enabled:
             logging.info("{0}:{1}: enabling other buttons".format(self.logprefix, "setButtonsOnNext"))
-            self.button_next_item.SetLabel("Show next item")
+            if not self.nextItemButtonLabelSet:
+                self.button_next_item.SetLabel("Show next item")
+                self.nextItemButtonLabelSet = True
             self.button_shift_item.Enable()
             self.button_delete_item.Enable()
             self.firstEditText.Enable()
@@ -724,11 +727,15 @@ class EditTestFrame(wx.Frame):
         if theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.BOTH:
             self.button_previous_item.Disable()
             self.button_next_item.Disable()
-        if theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.EMPTY:
+        elif theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.EMPTY:
             self.button_previous_item.Disable()
+            self.button_next_item.SetLabel("Show first item")
+            self.nextItemButtonLabelSet = False
             self.button_next_item.Disable()
             self.button_shift_item.Disable()
             self.button_delete_item.Disable()
+            self.input_search_term.Disable()
+            self.button_search.Disable()
         elif theItemListBoundsStatus == item_list_bounds_status.ItemListBoundsStatus.END:
             self.button_previous_item.Enable()
             self.button_next_item.Disable()

@@ -74,11 +74,8 @@ class TestManager:
     def getNumberOfItems(self, test_id):
         self.cursor.execute("SELECT COUNT(*) FROM testContents WHERE testId = '" + str(test_id) + "'")
         row = self.cursor.fetchone()
-        count = -1
-        if row != None:
-            count = row[0]
-        logging.info("{0}:{1}: test id: {2} has {3} items".format(self.logprefix, "getNumberOfItems", test_id, count))
-        return count
+        logging.info("{0}:{1}: test id: {2} has {3} items".format(self.logprefix, "getNumberOfItems", test_id, row[0]))
+        return row[0]
     
     def get_similar_results(self, test_id, german_value, english_value):
         ret_list = []
