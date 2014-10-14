@@ -56,6 +56,21 @@ class TestManager:
         self.connect.commit()
         return self.get_test_id(test_name)
     
+    def get_number_of_tests(self):
+        self.cursor.execute("SELECT COUNT(*) FROM tests")
+        row = self.cursor.fetchone()
+        count = row[0]
+        logging.info("{0}:{1}: number of tests: {2}".format(self.logprefix, "getNumberOfItems", count))
+        return count
+    
+    def get_other_tests(self, test_id):
+        self.cursor.execute("SELECT testId, testName FROM tests WHERE NOT testId = '" +  str(test_id) + "'")
+        rows = self.cursor.fetchall()
+        test_list = []
+        for row in rows:
+            test_list.append([row[0], row[1], self.getNumberOfItems(row[0])])
+        return test_list
+    
     def getNumberOfItems(self, test_id):
         self.cursor.execute("SELECT COUNT(*) FROM testContents WHERE testId = '" + str(test_id) + "'")
         row = self.cursor.fetchone()
@@ -64,6 +79,26 @@ class TestManager:
             count = row[0]
         logging.info("{0}:{1}: test id: {2} has {3} items".format(self.logprefix, "getNumberOfItems", test_id, count))
         return count
+    
+    def get_similar_results(self, test_id, german_value, english_value):
+        ret_list = []
+        self.cursor.execute("SELECT termLang1 FROM testContents WHERE termLang2 = '" +  english_value 
+                            + "' AND testId = '" + str(test_id) + "' AND NOT termLang1 = '" + german_value + "'")
+        rows = self.cursor.fetchall()
+        if rows:
+            terms = []
+            for row in rows:
+                terms.append(row[0])
+            ret_list.append([found_status.FoundStatus.DE_FOUND, terms])
+        self.cursor.execute("SELECT termLang2 FROM testContents WHERE termLang1 = '" +  german_value 
+                            + "' AND testId = '" + str(test_id) + "' AND NOT termLang2 = '" + english_value + "'")
+        rows = self.cursor.fetchall()
+        if rows:
+            terms = []
+            for row in rows:
+                terms.append(row[0])
+            ret_list.append([found_status.FoundStatus.EN_FOUND, terms])
+        return ret_list
     
     def check_status(self, test_id, german_value, english_value):
         ret_list = []
@@ -112,6 +147,10 @@ class TestManager:
     
     def delete_item(self, questionId):
         self.cursor.execute("DELETE FROM testContents WHERE questionId = '" + str(questionId) + "'")
+        self.connect.commit()
+        
+    def move_item(self, questionId, test_id):
+        self.cursor.execute("UPDATE testContents SET testId = '" + str(test_id) + "' WHERE questionId = '" + str(questionId) + "'")
         self.connect.commit()
 
     def append_item_to_other_test(self, test_name, german_value, english_value):

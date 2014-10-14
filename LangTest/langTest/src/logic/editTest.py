@@ -81,9 +81,34 @@ class EditTest:
         self.test_manager.append_item_to_other_test(test_name, german_value, english_value)
         self.edit_test_UI.clearAppendText()
         
+    def get_number_of_tests(self):
+        return self.test_manager.get_number_of_tests()
+    
+    def move_item_to_other_test(self, test_id):
+        self.test_manager.move_item(self.questionId, test_id)
+        theItemListBoundsStatus = self.delete_current_stored_item()
+        self.edit_test_UI.setNewEditTextAfterDelete(theItemListBoundsStatus)
+        
+    def move_current_item(self):
+        ret_list = self.test_manager.get_similar_results(self.test_id, 
+                                                         self.testList[self.itemNumber - 1][1], 
+                                                         self.testList[self.itemNumber - 1][2])
+        if ret_list:
+            self.UI_factory.create_ShowSimilarResultsPopupWindow(self.edit_test_UI).start(ret_list,
+                                                                                          self.testList[self.itemNumber - 1][1], 
+                                                                                          self.testList[self.itemNumber - 1][2])
+        else:
+            test_list = self.test_manager.get_other_tests(self.test_id)
+            self.UI_factory.create_SelectTestPopupWindow(self.edit_test_UI).start(test_list,
+                                                                                  self)
+        
     def delete_current_item(self):
         logging.info("{0}:{1}: deleting item number {2}".format(self.logprefix, "delete_current_item", self.itemNumber))
         self.test_manager.delete_item(self.questionId)
+        theItemListBoundsStatus = self.delete_current_stored_item()
+        self.edit_test_UI.setNewEditTextAfterDelete(theItemListBoundsStatus)
+        
+    def delete_current_stored_item(self):
         self.testList.pop(self.itemNumber - 1)
         if len(self.testList) == self.itemNumber - 1:
             self.itemNumber -= 1
@@ -99,7 +124,7 @@ class EditTest:
             theItemListBoundsStatus = item_list_bounds_status.ItemListBoundsStatus.BEGIN
         else:
             logging.error("{0}:{1}: error, unexpected use case".format(self.logprefix, "delete_current_item"))
-        self.edit_test_UI.setNewEditTextAfterDelete(theItemListBoundsStatus)
+        return theItemListBoundsStatus
         
     def getCurrentItem(self):
         (self.questionId, itemFirst, itemSecond) = self.testList[self.itemNumber - 1]

@@ -44,6 +44,12 @@ class UIFactoryWXPython:
 	def create_SelectItemPopupWindow(self, parent):
 		return edit_test_frame.SelectItemPopupWindow(parent)
 	
+	def create_SelectTestPopupWindow(self, parent):
+		return edit_test_frame.SelectTestPopupWindow(parent)
+	
+	def create_ShowSimilarResultsPopupWindow(self, parent):
+		return edit_test_frame.ShowSimilarResultsPopupWindow(parent)
+	
 	def getPathForImportFileDialog(self, parent):
 		openFileDialog = wx.FileDialog(parent, style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 		openFileDialog.ShowModal()
