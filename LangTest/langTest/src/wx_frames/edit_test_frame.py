@@ -85,15 +85,15 @@ class SelectTestPopupWindow(wx.Frame):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         hbox.Add(wx.StaticText(self, label="    ", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         vbox2 = wx.BoxSizer(wx.VERTICAL)
-        vbox2.Add(wx.StaticText(self, id=-1, label="Please choose a test to move this item to.", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-        grid = wx.FlexGridSizer(len(test_list) + 1, 3, hgap=50)
-        grid.Add(wx.StaticText(self, id=-1, label="\nTest name", style=wx.ALIGN_CENTER))
-        grid.Add(wx.StaticText(self, id=-1, label="\nNumber of items", style=wx.ALIGN_CENTER))
+        vbox2.Add(wx.StaticText(self, id=-1, label="\nPlease choose a test to move this item to", style=wx.ALIGN_CENTER), flag=wx.CENTER)
+        grid = wx.FlexGridSizer(len(test_list) + 1, 3, hgap=50, vgap=10)
+        grid.Add(wx.StaticText(self, id=-1, label="Test name", style=wx.ALIGN_CENTER))
+        grid.Add(wx.StaticText(self, id=-1, label="Number of items", style=wx.ALIGN_CENTER))
         grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
         self.button_to_test_id = dict()
         for test_details in test_list:
-            grid.Add(wx.StaticText(self, id=-1, label=test_details[1], style=wx.ALIGN_CENTER))
-            grid.Add(wx.StaticText(self, id=-1, label=str(test_details[2]), style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="  " + test_details[1], style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="  " + str(test_details[2]), style=wx.ALIGN_CENTER))
             button_append = wx.Button(self, -1, 'Move')
             self.Bind(wx.EVT_BUTTON, self.OnButtonMoveClicked, button_append)
             logging.info("{0}:{1}: append button has id: {2}".format(self.logprefix, "start", id(button_append)))
@@ -362,20 +362,20 @@ class SelectOtherTestPopupWindow(wx.Frame):
             vbox.Add(wx.StaticText(self, id=-1, label="\nThe English expression", style=wx.ALIGN_CENTER), flag=wx.CENTER)
             vbox.Add(wx.StaticText(self, id=-1, label="'" + self.english_value + "'", style=wx.ALIGN_CENTER), flag=wx.CENTER)
         vbox.Add(wx.StaticText(self, id=-1, label="has been found elsewhere. Please choose a test to append your item to.", style=wx.ALIGN_CENTER), flag=wx.CENTER)
-        grid = wx.FlexGridSizer(len(found_test_name_to_values) + 1, 3, hgap=50)
+        grid = wx.FlexGridSizer(len(found_test_name_to_values) + 1, 3, hgap=50, vgap=10)
         grid.Add(wx.StaticText(self, id=-1, label="\nTest name", style=wx.ALIGN_CENTER))
         if the_found_status == found_status.FoundStatus.DE_FOUND:
             grid.Add(wx.StaticText(self, id=-1, label="\nEnglish translations", style=wx.ALIGN_CENTER))
         else:
             grid.Add(wx.StaticText(self, id=-1, label="\nGerman translations", style=wx.ALIGN_CENTER))
-        grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
+        grid.Add(wx.StaticText(self, id=-1, label="\n", style=wx.ALIGN_CENTER))
         for test_name in found_test_name_to_values:
-            grid.Add(wx.StaticText(self, id=-1, label=test_name, style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="  " + test_name, style=wx.ALIGN_CENTER))
             found_values = found_test_name_to_values[test_name]
             found_values_string = ""
             for found_value in found_values:
                 found_values_string += "'" + found_value + "'\n"
-            grid.Add(wx.StaticText(self, id=-1, label=found_values_string, style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="  " + found_values_string, style=wx.ALIGN_CENTER))
             button_append = wx.Button(self, -1, 'Append')
             self.Bind(wx.EVT_BUTTON, self.OnButtonAppendClicked, button_append)
             logging.info("{0}:{1}: append button has id: {2}".format(self.logprefix, "start", id(button_append)))

@@ -71,7 +71,7 @@ class EditTest:
             if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
                 self.testList[self.itemNumber - 1] = (self.questionId, firstTextValue, secondTextValue)
         else:
-            self.test_manager.modify_question(self.test_id, self.questionId, secondTextValue, firstTextValue)
+            ret_list = self.test_manager.modify_question(self.test_id, self.questionId, secondTextValue, firstTextValue)
             if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
                 self.testList[self.itemNumber - 1] = (self.questionId, secondTextValue, firstTextValue)
         return ret_list
@@ -219,10 +219,11 @@ class EditTest:
         matches = self.test_manager.getMatches(expr, self.test_id)
         logging.info("{0}:{1}: found {2} items for expression: {3}".format(self.logprefix, "searchExpression", len(matches), expr))
         if not self.getDeToEn():
+            new_matches = []
             for item in matches:
-                item1 = ''.join(item[1])
-                item[1] = ''.join(item[2])
-                item[2] = item1
+                logging.info("{0}:{1}: found {2}, {3}".format(self.logprefix, "searchExpression", item[1], item[2]))
+                new_matches.append([item[0], item[2], item[1]])
+            matches = new_matches
         self.UI_factory.create_SelectItemPopupWindow(self.edit_test_UI).start(matches, self)
         
     def set_question(self, questionId):
