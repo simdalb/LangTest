@@ -95,14 +95,40 @@ class TestSelectionFrame(wx.Frame):
         self.testSelection = testSelection
         self.Bind(wx.EVT_CLOSE, self.when_closed)
         self.SetBackgroundColour('WHITE')
+        self.button_to_test_id = dict()
+        hbox3 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox3.Add(wx.StaticText(self, id=-1, label="      ", style=wx.ALIGN_CENTER))
         vbox = wx.BoxSizer(wx.VERTICAL)
         tests = testSelection.get_tests()
         logging.info("{0}:{1}: found {2} tests".format(self.logprefix, "start", len(tests)))
         if tests:
-            vbox.Add(wx.StaticText(self, label='\nDouble click a test:\n'), flag=wx.CENTER)
-            test_list_box = wx.ListBox(self, choices=tests)
-            self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnListItemDClicked, test_list_box)
-            vbox.Add(test_list_box, 1, flag=wx.CENTER)
+            vbox.Add(wx.StaticText(self, label='\nChoose a test:\n'), flag=wx.CENTER)
+            grid = wx.FlexGridSizer(len(tests) + 1, 5, hgap=50, vgap=10)
+            grid.Add(wx.StaticText(self, id=-1, label="\nTest name", style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="\nNumber of items", style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="\nScore", style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="\nDone on", style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
+            for test in tests:
+                grid.Add(wx.StaticText(self, id=-1, label="  " + test[0], style=wx.ALIGN_CENTER))
+                grid.Add(wx.StaticText(self, id=-1, label="  " + str(test[2]), style=wx.ALIGN_CENTER))
+                isFirst = True
+                for score in test[3]:
+                    if isFirst:
+                        grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
+                        grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
+                    grid.Add(wx.StaticText(self, id=-1, label=str(score[0]), style=wx.ALIGN_CENTER))
+                    grid.Add(wx.StaticText(self, id=-1, label=score[1], style=wx.ALIGN_CENTER))
+                    if isFirst:
+                        self.addSelectButton(grid, test[1])
+                        isFirst = False
+                    else:
+                        grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
+                if isFirst:
+                    grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
+                    grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
+                    self.addSelectButton(grid, test[1])
+            vbox.Add(grid)
         vbox.Add(wx.StaticText(self, label='\nCreate a new test:\n'), flag=wx.CENTER)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.input_create_test = wx.TextCtrl(self)
@@ -126,15 +152,23 @@ class TestSelectionFrame(wx.Frame):
         hbox2.AddSpacer(30)
         vbox.Add(hbox2, flag=wx.CENTER)
         vbox.Add(wx.StaticText(self), flag=wx.CENTER)
-        self.SetSizerAndFit(vbox)
+        hbox3.Add(vbox, flag=wx.CENTER)
+        hbox3.Add(wx.StaticText(self, id=-1, label="      ", style=wx.ALIGN_CENTER))
+        self.SetSizerAndFit(hbox3)
         self.Centre()
         self.Show()
 
-    def OnListItemDClicked(self, event):
-        logging.info("{0}:{1}: user clicked string: {2}".format(self.logprefix, "OnListItemDClicked", event.GetString()))
+    def addSelectButton(self, grid, test_id):
+        button_select = wx.Button(self, -1, 'Do test')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonSelectClicked, button_select)
+        logging.info("{0}:{1}: select button has id: {2}".format(self.logprefix, "start", id(button_select)))
+        self.button_to_test_id[id(button_select)] = test_id
+        grid.Add(button_select)
+
+    def OnButtonSelectClicked(self, event):
         self.Unbind(wx.EVT_CLOSE)
         self.Hide()
-        self.testSelection.set_test_name(event.GetString())
+        self.testSelection.set_test_id(self.button_to_test_id[id(event.GetEventObject())])
         self.Close()
 
     def OnButtonCreateClicked(self, event):

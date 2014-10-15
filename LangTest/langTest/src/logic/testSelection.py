@@ -2,13 +2,15 @@
 import logging
 
 class TestSelection:
-    def __init__(self, manager, UI_factory, test_manager):
+    def __init__(self, manager, UI_factory, test_manager, user_name, user_id):
         self.logprefix = "TestSelection"
         logging.info("{0}:{1}:".format(self.logprefix, "__init__"))
         self.manager = manager
         self.UI_factory = UI_factory
         self.test_selection_UI = UI_factory.create_test_selection_UI()
         self.test_manager = test_manager
+        self.user_name = user_name
+        self.user_id = user_id
         
     def start(self):
         self.test_selection_UI.start(self)
@@ -21,8 +23,11 @@ class TestSelection:
             self.manager.do_edit_test(test_name, test_id)
         return test_exists
     
+    def set_test_id(self, test_id):
+        self.manager.do_edit_test(self.test_manager.get_test_name(test_id), test_id)
+    
     def get_tests(self):
-        return self.test_manager.get_tests()
+        return self.test_manager.get_tests(self.user_id)
     
     def inform_test_exists(self, test_name):
         self.UI_factory.create_InformTestExistsPopupWindow(self.test_selection_UI).start(test_name)

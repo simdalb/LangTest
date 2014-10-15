@@ -26,14 +26,22 @@ class TestManager:
         logging.info("{0}:{1}: test name: {2} has test id: {3}".format(self.logprefix, "get_test_name", test_name, test_name))
         return test_name
     
-    def get_tests(self):
-        self.cursor.execute("SELECT testName FROM tests")
-        test_name_list = []
-        for (test_name,) in self.cursor.fetchall():
-            logging.info("{0}:{1}: found test name: {2} in DB".format(self.logprefix, "get_tests", test_name))
-            test_name_list.append(test_name)
-        return test_name_list
-    
+    def get_tests(self, user_id):
+        self.cursor.execute("SELECT testName, testId FROM tests")
+        rows = self.cursor.fetchall()
+        tests = []
+        for row in rows:
+            self.cursor.execute("SELECT COUNT(*) FROM testContents WHERE testId = '" + str(row[1]) + "'")
+            count = self.cursor.fetchone()
+            tests.append([row[0], row[1], count[0]])
+        test_list = []
+        for test in tests:
+            logging.info("{0}:{1}: found test name: {2} in DB".format(self.logprefix, "get_tests", test[0]))
+            self.cursor.execute("SELECT score, timestamp FROM stats WHERE userId = '" + str(user_id) + "' AND testId = '" + str(test[1]) + "'")
+            rows2 = self.cursor.fetchall()
+            test_list.append([test[0], test[1], test[2], rows2])
+        return test_list
+
     def test_exists(self, test_name):
         return self.get_test_id(test_name) != -1
     

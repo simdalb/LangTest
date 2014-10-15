@@ -30,7 +30,9 @@ class Manager:
         logging.info("{0}:{1}:".format(self.logprefix, "do_test_selection"))
         theTestSelection = testSelection.TestSelection(self, 
                                                        self.UI_factory, 
-                                                       self.data_manager.get_data_factory().get_test_manager())
+                                                       self.data_manager.get_data_factory().get_test_manager(),
+                                                       self.user_name,
+                                                       self.user_id,)
         theTestSelection.start()
 
     def do_edit_test(self, test_name, test_id):
