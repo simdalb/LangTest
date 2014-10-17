@@ -99,7 +99,17 @@ class batch_import:
 	
 DATABASE DESIGN
 
-Table tests: (test ID, testname) list
+Table tests: (test ID, testname, testCreationTime) list
 Table users: (user ID, username) list
 Tables test: (test ID, question ID, German, English) list
-Table user: (user ID, test ID, timestamp, score) list
+Table user: (user ID, test ID, [timestamp, score]) list
+
+STATS
+
+pre-effective score = max (0, %score - time since last test x 10%)
+
+effective score = pre-effective score - test never done ? time since created : 0
+                  - pre-effective score == 0 ? (time since pre-effective score == 0) : 0
+                  
+time that pre-effective score == 0 happened  =  time that test was taken + 10 * score fraction 
+time since pre-effective score == 0 = 

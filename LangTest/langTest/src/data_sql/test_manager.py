@@ -27,19 +27,19 @@ class TestManager:
         return test_name
     
     def get_tests(self, user_id):
-        self.cursor.execute("SELECT testName, testId FROM tests")
+        self.cursor.execute("SELECT testName, testId, timestamp FROM tests")
         rows = self.cursor.fetchall()
         tests = []
         for row in rows:
             self.cursor.execute("SELECT COUNT(*) FROM testContents WHERE testId = '" + str(row[1]) + "'")
             count = self.cursor.fetchone()
-            tests.append([row[0], row[1], count[0]])
+            tests.append([row[0], row[1], row[2], count[0]])
         test_list = []
         for test in tests:
             logging.info("{0}:{1}: found test name: {2} in DB".format(self.logprefix, "get_tests", test[0]))
             self.cursor.execute("SELECT score, timestamp FROM stats WHERE userId = '" + str(user_id) + "' AND testId = '" + str(test[1]) + "'")
             rows2 = self.cursor.fetchall()
-            test_list.append([test[0], test[1], test[2], rows2])
+            test_list.append([test[0], test[1], test[2], test[3], rows2])
         return test_list
 
     def test_exists(self, test_name):
@@ -58,9 +58,9 @@ class TestManager:
             test_name_list.append(test_name)
         return test_name_list
 
-    def create_test(self, test_name):
+    def create_test(self, test_name, timestamp):
         logging.info("{0}:{1}: creating test name: {2}".format(self.logprefix, "create_test", test_name))
-        self.cursor.execute("INSERT INTO tests (testName) VALUES ('" + test_name + "')")
+        self.cursor.execute("INSERT INTO tests (testName, timestamp) VALUES ('" + test_name + "', '" + timestamp + "')")
         self.connect.commit()
         return self.get_test_id(test_name)
     

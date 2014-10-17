@@ -100,20 +100,23 @@ class TestSelectionFrame(wx.Frame):
         hbox3.Add(wx.StaticText(self, id=-1, label="      ", style=wx.ALIGN_CENTER))
         vbox = wx.BoxSizer(wx.VERTICAL)
         tests = testSelection.get_tests()
+# testName, testId, timestamp, count, [score, timestamp] x n
         logging.info("{0}:{1}: found {2} tests".format(self.logprefix, "start", len(tests)))
         if tests:
             vbox.Add(wx.StaticText(self, label='\nChoose a test:\n'), flag=wx.CENTER)
             grid = wx.FlexGridSizer(len(tests) + 1, 5, hgap=50, vgap=10)
             grid.Add(wx.StaticText(self, id=-1, label="\nTest name", style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="\nCreated on", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, label="\nNumber of items", style=wx.ALIGN_CENTER))
-            grid.Add(wx.StaticText(self, id=-1, label="\nScore", style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="\nScore (%)", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, label="\nDone on", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
             for test in tests:
                 grid.Add(wx.StaticText(self, id=-1, label="  " + test[0], style=wx.ALIGN_CENTER))
-                grid.Add(wx.StaticText(self, id=-1, label="  " + str(test[2]), style=wx.ALIGN_CENTER))
+                grid.Add(wx.StaticText(self, id=-1, label="  " + test[2], style=wx.ALIGN_CENTER))
+                grid.Add(wx.StaticText(self, id=-1, label="  " + str(test[3]), style=wx.ALIGN_CENTER))
                 isFirst = True
-                for score in test[3]:
+                for score in test[4]:
                     if isFirst:
                         grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
                         grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))

@@ -24,6 +24,7 @@ class DataSQLManager:
                              "(" + \
                                 "testId INTEGER, " + \
                                 "testName CHAR(50) NOT NULL, " + \
+                                "timestamp CHAR(50) NOT NULL, " + \
                                 "PRIMARY KEY (testId), " + \
                                 "UNIQUE (testName)" + \
                              ")" \
