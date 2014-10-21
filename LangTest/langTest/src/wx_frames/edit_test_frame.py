@@ -528,6 +528,7 @@ class EditTestFrame(wx.Frame):
         button_quit = wx.Button(self, -1, 'Quit')
         self.Bind(wx.EVT_BUTTON, self.OnButtonQuitClicked, button_quit)
         self.button_start_test = wx.Button(self, -1, 'Start test')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonStartTestClicked, self.button_start_test)
         button_test_selection = wx.Button(self, -1, '<< Back to\n test selection')
         self.Bind(wx.EVT_BUTTON, self.OnButtonTestSelectionClicked, button_test_selection)
         hbox3.AddSpacer(30)
@@ -558,6 +559,12 @@ class EditTestFrame(wx.Frame):
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
+        
+    def OnButtonStartTestClicked(self, event):
+        self.Unbind(wx.EVT_CLOSE)
+        self.Hide()
+        self.editTest.start_test()
+        self.Close()
         
     def OnButtonMoveItemClicked(self, event):
         self.editTest.move_current_item()

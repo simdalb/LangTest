@@ -46,6 +46,8 @@ class TestSelection:
         total = test[3]
         score_timestamp_list = test[4]
         creation_time = datetime.strptime(test[2], "%b %d %Y %H:%M:%S")
+        one_week = datetime.strptime("Jan 01 2014 12:00:00", "%b %d %Y %H:%M:%S") - datetime.strptime("Jan 08 2014 12:00:00", "%b %d %Y %H:%M:%S")
+        time_since_last_test = one_week
         score = 0
         timestamp_now = datetime.utcnow()
         pre_effective_score = 0
@@ -62,8 +64,7 @@ class TestSelection:
             time_since_last_test = self.current_time - datetime.strptime(timestamp, "%b %d %Y %H:%M:%S")
             pre_effective_score = max(0, score - 0.1 * time_since_last_test.weeks)
         time_since_created = timestamp_now - creation_time
-        time_of_zero_pre_effective_score = time_since_last_test + score * 10 * (datetime.strptime("Jan 01 2014 12:00:00", "%b %d %Y %H:%M:%S")
-                                                                              - datetime.strptime("Jan 08 2014 12:00:00", "%b %d %Y %H:%M:%S"))
+        time_of_zero_pre_effective_score = time_since_last_test + score * 10 * one_week
         time_since_zero_pre_effective_score = timestamp_now - time_of_zero_pre_effective_score
         return pre_effective_score - (0 if score_timestamp_list else time_since_created.seconds) \
                                    - (time_since_zero_pre_effective_score.seconds if score_timestamp_list and pre_effective_score == 0 else 0)

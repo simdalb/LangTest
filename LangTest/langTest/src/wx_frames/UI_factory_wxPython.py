@@ -2,6 +2,7 @@
 import login_frame
 import test_selection_frame
 import edit_test_frame
+import test_frame
 import wx
 
 class UIFactoryWXPython:
@@ -49,6 +50,9 @@ class UIFactoryWXPython:
 	
 	def create_ShowSimilarResultsPopupWindow(self, parent):
 		return edit_test_frame.ShowSimilarResultsPopupWindow(parent)
+	
+	def create_test_UI(self):
+		return test_frame.TestFrame()
 	
 	def getPathForImportFileDialog(self, parent):
 		openFileDialog = wx.FileDialog(parent, style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)

@@ -22,7 +22,10 @@ class EditTest:
 
     def start(self):
         self.edit_test_UI.start(self)
-
+        
+    def start_test(self):
+        self.manager.do_test()
+        
     def getDeToEn(self):
         return self.persistency_manager.getDeToEn(self.user_id)
     
@@ -267,7 +270,7 @@ class EditTest:
         for terms in termsList:
             self.edit_test_UI.process_ret_list(self.append_item(terms[0], terms[1]))
         return (0, 0)
-    
+
     def quit(self):
         self.manager.quit()
 

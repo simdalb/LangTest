@@ -2,6 +2,7 @@
 from logic import login
 from logic import testSelection
 from logic import editTest
+from logic import test
 import logging
 import sys
 
@@ -47,10 +48,18 @@ class Manager:
                                         test_name,
                                         test_id)
         theEditTest.start()
-
-    def do_stats(self):
-        pass
         
+    def do_test(self):
+        theTest = test.Test(self,
+                            self.UI_factory,
+                            self.data_manager.get_data_factory().get_test_manager(),
+                            self.data_manager.get_data_factory().get_persistency_manager(),
+                            self.user_name,
+                            self.user_id,
+                            self.test_name,
+                            self.test_id)
+        theTest.start()
+
     def quit(self):
         self.data_manager.quit()
         sys.exit(0)

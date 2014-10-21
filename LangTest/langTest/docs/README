@@ -42,12 +42,29 @@ button, "Skip preview >>" and then "<< Back to list of tests"
 
 New window: Test
 Name of test
-first field: uneditable, large
-Below, second field: editable, large, return to submit
-Below, "Previous item: ", 2 items, editable, ", button "Save changes"
-"Completed: " number done
-"Correct: " 
+first field: editable, question
+second field: editable, empty, return to submit, 
+buttons: submit button, save, skip, view answer
+
+Text: "Correct"
+or
+"The answer "|" is wrong
+
+Correct answer to previous question: "|" followed by "edit" button
+
+  Pop-up prompt when user wants something* that would invalidate test:
+  "Executing this operation will invalidate this test run. Your score will not be saved"
+*view answer, skip, abort test
+  Pop-up prompt when user wants something% that would invalidate all test scores:
+  "Executing this operation will invalidate this test. Your scores will deleted"
+%Modify first field, save, edit
+button: "Execute", button: "Cancel"
+row 1: "Completed: ", "Remaining:"
+row 2: "Correct: ", "Wrong: " 
 "Total: "
+button: View items you got correct
+button: View items you got wrong
+button: redo test
 "<< Abort and return to preview" button
 
 2. New window: CreateTest

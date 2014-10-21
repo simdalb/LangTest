@@ -100,14 +100,14 @@ class TestSelectionFrame(wx.Frame):
         hbox3.Add(wx.StaticText(self, id=-1, label="      ", style=wx.ALIGN_CENTER))
         vbox = wx.BoxSizer(wx.VERTICAL)
         tests = testSelection.get_tests()
-# testName, testId, timestamp, count, [score, timestamp] x n
         logging.info("{0}:{1}: found {2} tests".format(self.logprefix, "start", len(tests)))
         if tests:
             vbox.Add(wx.StaticText(self, label='\nChoose a test:\n'), flag=wx.CENTER)
-            grid = wx.FlexGridSizer(len(tests) + 1, 5, hgap=50, vgap=10)
+            grid = wx.FlexGridSizer(len(tests) + 1, 7, hgap=50, vgap=10)
             grid.Add(wx.StaticText(self, id=-1, label="\nTest name", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, label="\nCreated on", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, label="\nNumber of items", style=wx.ALIGN_CENTER))
+            grid.Add(wx.StaticText(self, id=-1, label="\nScore", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, label="\nScore (%)", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, label="\nDone on", style=wx.ALIGN_CENTER))
             grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
@@ -117,10 +117,12 @@ class TestSelectionFrame(wx.Frame):
                 grid.Add(wx.StaticText(self, id=-1, label="  " + str(test[3]), style=wx.ALIGN_CENTER))
                 isFirst = True
                 for score in test[4]:
-                    if isFirst:
+                    if not isFirst:
+                        grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
                         grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
                         grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
                     grid.Add(wx.StaticText(self, id=-1, label=str(score[0]), style=wx.ALIGN_CENTER))
+                    grid.Add(wx.StaticText(self, id=-1, label=str(score[0]/float(test[3])), style=wx.ALIGN_CENTER))
                     grid.Add(wx.StaticText(self, id=-1, label=score[1], style=wx.ALIGN_CENTER))
                     if isFirst:
                         self.addSelectButton(grid, test[1])
@@ -128,6 +130,7 @@ class TestSelectionFrame(wx.Frame):
                     else:
                         grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
                 if isFirst:
+                    grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
                     grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
                     grid.Add(wx.StaticText(self, id=-1, style=wx.ALIGN_CENTER))
                     self.addSelectButton(grid, test[1])
