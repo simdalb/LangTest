@@ -130,3 +130,8 @@ effective score = pre-effective score - test never done ? time since created : 0
                   
 time that pre-effective score == 0 happened  =  time that test was taken + 10 * score fraction 
 time since pre-effective score == 0 = 
+
+
+TODO: 
+1. limit number of items in test to 999
+2. Tab to move among buttons / textctrl
