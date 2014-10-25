@@ -1,5 +1,7 @@
 
 import logging
+import random
+from datetime import datetime
 
 class Test:
     def __init__(self, manager, UI_factory, test_manager, persistency_manager, user_name, user_id, test_name, test_id):
@@ -15,6 +17,7 @@ class Test:
         self.test_name = test_name
         self.test_id = test_id
         self.test_list = []
+        self.wrong_results = []
         self.itemNumber = -1
         self.questionId = -1
         self.question = ""
@@ -45,6 +48,7 @@ class Test:
     def getNextQuestion(self):
         if not self.test_list:
             self.test_list = self.test_manager.getTestList(self.test_id)
+            random.shuffle(self.test_list)
         self.itemNumber += 1
         if self.getDeToEn():
             (self.questionId, self.question, self.answer) = self.test_list[self.itemNumber]
@@ -55,6 +59,12 @@ class Test:
     def getAnswer(self):
         return self.answer
     
+    def wrong_items(self):
+        return self.wrong_results
+    
+    def test_summary(self):
+        self.UI_factory.create_TestSummaryPopupWindow(self.test_UI).start(self.score, self.getNumberOfItems(), self)
+    
     def update_results(self, answer):
         logging.info("{0}:{1}: user answer: {2}, correct answer: {3}".format(self.logprefix, "update_results", answer, self.answer))
         correct = False
@@ -62,11 +72,15 @@ class Test:
             logging.info("{0}:{1}: answer was correct".format(self.logprefix, "update_results"))
             correct = True
             self.score += 1
+        else:
+            self.wrong_results.append(self.question + " | " + self.answer)
         done = self.itemNumber + 1
         remaining = len(self.test_list) - done
         wrong = done - self.score
         item = self.question + " | " + self.answer
         logging.info("{0}:{1}: correct: {2}".format(self.logprefix, "update_results", correct))
+        if remaining == 0:
+            self.test_manager.write_test_resuts(self.user_id, self.test_id, datetime.strftime(datetime.utcnow(), "%b %d %Y %H:%M:%S"), self.score)
         return (self.score, wrong, done, remaining, correct, item)
     
     def back_to_edit_test(self):
@@ -74,5 +88,3 @@ class Test:
     
     def quit(self):
         self.manager.quit()
-
-    

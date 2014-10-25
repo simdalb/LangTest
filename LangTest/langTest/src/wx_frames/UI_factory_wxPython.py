@@ -54,6 +54,9 @@ class UIFactoryWXPython:
 	def create_test_UI(self):
 		return test_frame.TestFrame()
 	
+	def create_TestSummaryPopupWindow(self, parent):
+		return test_frame.TestSummaryPopupWindow(parent)
+	
 	def getPathForImportFileDialog(self, parent):
 		openFileDialog = wx.FileDialog(parent, style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 		openFileDialog.ShowModal()

@@ -203,3 +203,8 @@ class TestManager:
     def getAllItems(self, test_id):
         self.cursor.execute("SELECT termLang1, termLang2 FROM testContents WHERE testId = '" + str(test_id) + "'")
         return self.cursor.fetchall()
+    
+    def write_test_resuts(self, user_id, test_id, timestamp_now, score):
+        self.cursor.execute("INSERT INTO stats (userId, testId, timestamp, score) VALUES ('" 
+                            + str(user_id) + "','" + str(test_id) + "','" + timestamp_now + "','" + str(score) + "')")
+        self.connect.commit()

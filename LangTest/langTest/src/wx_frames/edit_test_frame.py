@@ -59,7 +59,7 @@ class ShowSimilarResultsPopupWindow(wx.Frame):
         vbox.Add(grid, flag=wx.CENTER)
 
     def OnButtonOKClicked(self, event):
-        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "OnButtonCancelClicked"))
+        logging.info("{0}:{1}: user clicked OK".format(self.logprefix, "OnButtonOKClicked"))
         self.Unbind(wx.EVT_CLOSE)
         self.MakeModal(False)
         self.Close()
@@ -527,7 +527,7 @@ class EditTestFrame(wx.Frame):
         hbox3 = wx.BoxSizer(wx.HORIZONTAL)
         button_quit = wx.Button(self, -1, 'Quit')
         self.Bind(wx.EVT_BUTTON, self.OnButtonQuitClicked, button_quit)
-        self.button_start_test = wx.Button(self, -1, 'Start test')
+        self.button_start_test = wx.Button(self, -1, 'Do test')
         self.Bind(wx.EVT_BUTTON, self.OnButtonStartTestClicked, self.button_start_test)
         button_test_selection = wx.Button(self, -1, '<< Back to\n test selection')
         self.Bind(wx.EVT_BUTTON, self.OnButtonTestSelectionClicked, button_test_selection)

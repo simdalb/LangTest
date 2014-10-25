@@ -2,6 +2,48 @@
 import wx
 import logging
 
+class TestSummaryPopupWindow(wx.Frame):
+    def __init__(self, parent):
+        self.logprefix = "TestSummaryPopupWindow"
+        super(TestSummaryPopupWindow, self).__init__(parent, size=(300, 160))
+
+    def start(self, score, numberOfItems, parent):
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
+        self.Bind(wx.EVT_CLOSE, self.when_closed)
+        self.parent = parent
+        self.SetBackgroundColour('WHITE')
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        vbox.AddSpacer(30)
+        perc = str(int((100 * score / float(numberOfItems)) + 0.5))
+        vbox.Add(wx.StaticText(self, label="       Test completed. Your score " + str(score) + " / " + str(numberOfItems) 
+                               + " = " + perc + " % has been saved       "), flag=wx.CENTER)
+        vbox.AddSpacer(10)
+        wrongs = self.parent.wrong_items()
+        if wrongs:
+            vbox.Add(wx.StaticText(self, label='\nItems you got wrong:\n'), flag=wx.CENTER)
+            list_box = wx.ListBox(self, choices=wrongs)
+            vbox.Add(list_box, 1, flag=wx.CENTER)
+        vbox.AddSpacer(30)
+        self.button_close = wx.Button(self, -1, label='Close')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonCloseClicked, self.button_close)
+        vbox.Add(self.button_close, flag=wx.CENTER)
+        vbox.AddSpacer(30)
+        self.SetSizerAndFit(vbox)
+        self.Centre()
+        self.Show()
+
+    def OnButtonCloseClicked(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "OnButtonCloseClicked"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+
+    def when_closed(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "when_closed"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+
 class TestFrame(wx.Frame):
     def __init__(self):
         self.logprefix = "TestFrame"
@@ -123,9 +165,17 @@ class TestFrame(wx.Frame):
         self.previousItemText.Center()
         if not self.button_edit.IsEnabled():
             self.button_edit.Enable()
-        self.firstEditText.SetValue(self.test.getNextQuestion())
         self.secondEditText.Clear()
-        self.secondEditText.SetFocus()
+        if remaining != 0:
+            self.firstEditText.SetValue(self.test.getNextQuestion())
+            self.secondEditText.SetFocus()
+        else:
+            self.button_submit.Disable()
+            self.firstEditText.Clear()
+            self.secondEditText.Clear()
+            self.firstEditText.Disable()
+            self.secondEditText.Disable()
+            self.test.test_summary()
         
     def get_number_with_padding(self, number):
         if number < 10:
