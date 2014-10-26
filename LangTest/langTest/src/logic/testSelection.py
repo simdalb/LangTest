@@ -47,6 +47,7 @@ class TestSelection:
         total = test[3]
         score_timestamp_list = test[4]
         creation_time = datetime.strptime(test[2], "%b %d %Y %H:%M:%S")
+        most_recent_timestamp = creation_time
         one_week = datetime.strptime("Jan 01 2014 12:00:00", "%b %d %Y %H:%M:%S") - datetime.strptime("Jan 08 2014 12:00:00", "%b %d %Y %H:%M:%S")
         time_since_last_test = one_week
         score = 0

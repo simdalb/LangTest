@@ -23,6 +23,7 @@ class Test:
         self.question = ""
         self.answer = ""
         self.score = 0
+        self.multi_answer_list = dict()
         
     def start(self):
         self.test_UI.start(self)
@@ -48,13 +49,20 @@ class Test:
     def getNextQuestion(self):
         if not self.test_list:
             self.test_list = self.test_manager.getTestList(self.test_id)
+            random.seed()
             random.shuffle(self.test_list)
         self.itemNumber += 1
         if self.getDeToEn():
             (self.questionId, self.question, self.answer) = self.test_list[self.itemNumber]
         else:
             (self.questionId, self.answer, self.question) = self.test_list[self.itemNumber]
-        return self.question
+        logging.info("{0}:{1}: question: {2}, answer: {3}".format(self.logprefix, "getNextQuestion", self.question, self.answer))
+        previous_answers = []
+        try:
+            previous_answers = self.multi_answer_list[self.question]
+        except:
+            pass
+        return (self.question, previous_answers)
     
     def getAnswer(self):
         return self.answer
@@ -64,16 +72,46 @@ class Test:
     
     def test_summary(self):
         self.UI_factory.create_TestSummaryPopupWindow(self.test_UI).start(self.score, self.getNumberOfItems(), self)
+        
+    def find_answer_elsewhere(self, given_answer):
+        for item in self.test_list:
+            question = ""
+            answer = ""
+            if self.getDeToEn():
+                question =item[1]
+                answer = item[2]
+            else:
+                answer = item[1]
+                question =item[2]
+            if given_answer == answer and self.question == question:
+                try:
+                    for previous_answer in self.multi_answer_list[self.question]:
+                        if previous_answer == given_answer:
+                            return False
+                except:
+                    pass
+                item, self.test_list[self.itemNumber] = self.test_list[self.itemNumber], item
+                return True
+        return False
     
     def update_results(self, answer):
         logging.info("{0}:{1}: user answer: {2}, correct answer: {3}".format(self.logprefix, "update_results", answer, self.answer))
         correct = False
         if answer == self.answer:
-            logging.info("{0}:{1}: answer was correct".format(self.logprefix, "update_results"))
             correct = True
-            self.score += 1
+        elif self.find_answer_elsewhere(answer):
+            correct = True
         else:
             self.wrong_results.append(self.question + " | " + self.answer)
+        if correct:
+            logging.info("{0}:{1}: answer was correct".format(self.logprefix, "update_results"))
+            self.score += 1
+            try:
+                self.multi_answer_list[self.question].append(self.answer)
+            except:
+                answer_list = []
+                answer_list.append(self.answer)
+                self.multi_answer_list[self.question] = answer_list
         done = self.itemNumber + 1
         remaining = len(self.test_list) - done
         wrong = done - self.score

@@ -66,6 +66,8 @@ class TestFrame(wx.Frame):
         hbox_info.Add(wx.StaticText(self, label='\n                               '), flag=wx.CENTER)
         vbox.Add(hbox_info, flag=wx.CENTER)
         vbox.AddSpacer(30)
+        self.previousAnswersText = wx.StaticText(self)
+        vbox.Add(self.previousAnswersText)
         grid = wx.FlexGridSizer(2, 3, hgap=20)
         firstStaticText = wx.StaticText(self)
         secondStaticText = wx.StaticText(self)
@@ -79,7 +81,7 @@ class TestFrame(wx.Frame):
         grid.Add(secondStaticText, flag=wx.CENTER)
         grid.Add(wx.StaticText(self), flag=wx.CENTER)
         self.firstEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
-        self.secondEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
+        self.secondEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE | wx.TE_PROCESS_ENTER | wx.TE_RICH)
         self.firstEditText.SetEditable(False)
         grid.Add(self.firstEditText, flag=wx.CENTER)
         grid.Add(self.secondEditText, flag=wx.CENTER)
@@ -93,14 +95,13 @@ class TestFrame(wx.Frame):
         vbox.AddSpacer(30)
         self.previousItemStaticText = wx.StaticText(self, label="Previous question and correct answer:")
         vbox.Add(self.previousItemStaticText, flag=wx.CENTER)
-        vbox.AddSpacer(10)
-        self.previousItemText = wx.StaticText(self, style=wx.ALIGN_CENTER)
-        vbox.Add(self.previousItemText, flag=wx.ALIGN_CENTER)
-        vbox.AddSpacer(10)
+        self.previousItemText = wx.StaticText(self, label="(Answer will be placed here)")
+        vbox.Add(self.previousItemText, flag=wx.CENTER)
+        vbox.Add(wx.StaticText(self), flag=wx.CENTER)
         self.button_edit = wx.Button(self, -1, label='Edit')
         self.Bind(wx.EVT_BUTTON, self.OnButtonEditClicked, self.button_edit)
         vbox.Add(self.button_edit, flag=wx.CENTER)
-        vbox.AddSpacer(30)
+        vbox.AddSpacer(40)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         hbox.Add(wx.StaticText(self, label='\n                                          '), flag=wx.CENTER)
         grid3 = wx.FlexGridSizer(2, 2, hgap=60, vgap=10)
@@ -129,13 +130,11 @@ class TestFrame(wx.Frame):
         vbox.Add(hbox3, flag=wx.CENTER)
         vbox.AddSpacer(30)
         self.button_edit.Disable()
-        self.firstEditText.SetValue(self.test.getNextQuestion())
+        self.firstEditText.SetValue(self.test.getNextQuestion()[0])
         self.secondEditText.SetFocus()
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
-        self.previousItemText.SetLabel("(Answer will be placed here)")
-        self.previousItemText.Center()
         
     def OnButtonEditTestClicked(self, event):
         self.Unbind(wx.EVT_CLOSE)
@@ -151,8 +150,8 @@ class TestFrame(wx.Frame):
         self.Close()
         
     def handle_submitted_answer(self, answer):
+        logging.info("{0}:{1}: answer: {2}".format(self.logprefix, "handle_submitted_answer", answer))
         (score, wrong, done, remaining, correct, item) = self.test.update_results(answer)
-        logging.info("{0}:{1}: correct: {2}".format(self.logprefix, "handle_submitted_answer", correct))
         self.numberRightText.SetLabel("Correct answers: " + self.get_number_with_padding(score))
         self.numberWrongText.SetLabel("Wrong answers: " + self.get_number_with_padding(wrong))
         self.numberAnsweredText.SetLabel("Questions answered: " + self.get_number_with_padding(done))
@@ -167,9 +166,19 @@ class TestFrame(wx.Frame):
             self.button_edit.Enable()
         self.secondEditText.Clear()
         if remaining != 0:
-            self.firstEditText.SetValue(self.test.getNextQuestion())
+            next_question = self.test.getNextQuestion()
+            self.firstEditText.SetValue(next_question[0])
+            self.secondEditText.Clear()
+            self.secondEditText.SetInsertionPoint(0)
             self.secondEditText.SetFocus()
+            if next_question[1]:
+                logging.info("{0}:{1}: found previous answers".format(self.logprefix, "handle_submitted_answer"))
+                self.previousAnswersText.SetLabel("Previous answers were: '" + "', '".join(next_question[1]) + "'")
+            else:
+                logging.info("{0}:{1}: found no previous answers".format(self.logprefix, "handle_submitted_answer"))
+                self.previousAnswersText.SetLabel("")
         else:
+            logging.info("{0}:{1}: test complete".format(self.logprefix, "handle_submitted_answer"))
             self.button_submit.Disable()
             self.firstEditText.Clear()
             self.secondEditText.Clear()
@@ -186,7 +195,9 @@ class TestFrame(wx.Frame):
             return str(number)
 
     def OnSecondEditTextEntered(self, event):
-        self.handle_submitted_answer(self.secondEditText.GetValue())
+        answer = self.secondEditText.GetValue()
+        answer = answer[0:len(answer)-1]
+        self.handle_submitted_answer(answer)
 
     def OnButtonEditClicked(self, event):
         pass
