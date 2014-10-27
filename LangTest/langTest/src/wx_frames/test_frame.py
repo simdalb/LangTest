@@ -67,7 +67,7 @@ class TestFrame(wx.Frame):
         vbox.Add(hbox_info, flag=wx.CENTER)
         vbox.AddSpacer(30)
         self.previousAnswersText = wx.StaticText(self)
-        vbox.Add(self.previousAnswersText)
+        vbox.Add(self.previousAnswersText, flag=wx.CENTER)
         grid = wx.FlexGridSizer(2, 3, hgap=20)
         firstStaticText = wx.StaticText(self)
         secondStaticText = wx.StaticText(self)

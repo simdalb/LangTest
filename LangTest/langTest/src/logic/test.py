@@ -74,7 +74,9 @@ class Test:
         self.UI_factory.create_TestSummaryPopupWindow(self.test_UI).start(self.score, self.getNumberOfItems(), self)
         
     def find_answer_elsewhere(self, given_answer):
-        for item in self.test_list:
+        logging.info("{0}:{1}: searching for question: {2}, answer: {3}".format(self.logprefix, "find_answer_elsewhere", self.question, given_answer))
+        for i in range(self.itemNumber+1,len(self.test_list)):
+            item = self.test_list[i]
             question = ""
             answer = ""
             if self.getDeToEn():
@@ -87,15 +89,27 @@ class Test:
                 try:
                     for previous_answer in self.multi_answer_list[self.question]:
                         if previous_answer == given_answer:
+                            logging.info("{0}:{1}: answer already given".format(self.logprefix, "find_answer_elsewhere"))
                             return False
                 except:
                     pass
-                item, self.test_list[self.itemNumber] = self.test_list[self.itemNumber], item
+                logging.info("{0}:{1}: found item at: {2}".format(self.logprefix, "find_answer_elsewhere", i))
+                logging.info("{0}:{1}: found item: {2}, current: {3}".format(self.logprefix, "find_answer_elsewhere", item, self.test_list[self.itemNumber]))
+                self.test_list[i], self.test_list[self.itemNumber] = self.test_list[self.itemNumber], self.test_list[i]
+                logging.info("{0}:{1}: after swap: {2}, current: {3}".format(self.logprefix, "find_answer_elsewhere", item, self.test_list[self.itemNumber]))
+                if self.getDeToEn():
+                    (self.questionId, self.question, self.answer) = self.test_list[self.itemNumber]
+                else:
+                    (self.questionId, self.answer, self.question) = self.test_list[self.itemNumber]
+                logging.info("{0}:{1}: correct answer not already given. Confirm question: {2}, answer: {3}".format(self.logprefix, "find_answer_elsewhere", self.question, self.answer))
                 return True
         return False
     
     def update_results(self, answer):
         logging.info("{0}:{1}: user answer: {2}, correct answer: {3}".format(self.logprefix, "update_results", answer, self.answer))
+        logging.info("{0}:{1}: old item list:".format(self.logprefix, "update_results"))
+        for elem in self.test_list:
+            logging.info("{0}:{1}:            question: {2}, answer: {3}".format(self.logprefix, "update_results", elem[1], elem[2]))
         correct = False
         if answer == self.answer:
             correct = True
@@ -104,14 +118,18 @@ class Test:
         else:
             self.wrong_results.append(self.question + " | " + self.answer)
         if correct:
-            logging.info("{0}:{1}: answer was correct".format(self.logprefix, "update_results"))
             self.score += 1
             try:
                 self.multi_answer_list[self.question].append(self.answer)
+                logging.info("{0}:{1}: answer was correct, appended to multi answer list".format(self.logprefix, "update_results"))
             except:
                 answer_list = []
                 answer_list.append(self.answer)
                 self.multi_answer_list[self.question] = answer_list
+                logging.info("{0}:{1}: answer was correct, created entry for multi answer list".format(self.logprefix, "update_results"))
+        logging.info("{0}:{1}: new item list:".format(self.logprefix, "update_results"))
+        for elem in self.test_list:
+            logging.info("{0}:{1}:            question: {2}, answer: {3}".format(self.logprefix, "update_results", elem[1], elem[2]))
         done = self.itemNumber + 1
         remaining = len(self.test_list) - done
         wrong = done - self.score
