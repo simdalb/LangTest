@@ -67,7 +67,7 @@ class TestFrame(wx.Frame):
         vbox.Add(hbox_info, flag=wx.CENTER)
         vbox.AddSpacer(30)
         self.previousAnswersText = wx.StaticText(self)
-        vbox.Add(self.previousAnswersText, flag=wx.CENTER)
+        vbox.Add(self.previousAnswersText, flag=wx.ALIGN_LEFT)
         grid = wx.FlexGridSizer(2, 3, hgap=20)
         firstStaticText = wx.StaticText(self)
         secondStaticText = wx.StaticText(self)
@@ -173,7 +173,7 @@ class TestFrame(wx.Frame):
             self.secondEditText.SetFocus()
             if next_question[1]:
                 logging.info("{0}:{1}: found previous answers".format(self.logprefix, "handle_submitted_answer"))
-                self.previousAnswersText.SetLabel("Previous answers were: '" + "', '".join(next_question[1]) + "'")
+                self.previousAnswersText.SetLabel("               Previous answers were: '" + "', '".join(next_question[1]) + "'")
             else:
                 logging.info("{0}:{1}: found no previous answers".format(self.logprefix, "handle_submitted_answer"))
                 self.previousAnswersText.SetLabel("")
