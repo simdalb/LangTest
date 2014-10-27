@@ -1,6 +1,170 @@
 
 import wx
 import logging
+from common import found_status
+
+class InformNoScoreSavedPopupWindow(wx.Frame):
+    def __init__(self, parent):
+        self.logprefix = "InformModifyLaterPopupWindow"
+        super(InformModifyLaterPopupWindow, self).__init__(parent, size=(300, 160))
+
+    def start(self, ret_list, the_found_status):
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
+        self.Bind(wx.EVT_CLOSE, self.when_closed)
+        self.SetBackgroundColour('WHITE')
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.Add(wx.StaticText(self), label="    ")
+        hbox.Add(wx.StaticText(self), label="Test completed. Score will not be saved because test was modified")
+        hbox.Add(wx.StaticText(self), label="    ")
+        vbox.Add(hbox)
+        vbox.AddSpacer(30)
+        self.button_OK = wx.Button(self, -1, label='OK')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonOKClicked, self.button_OK)
+        vbox.Add(self.button_OK, flag=wx.CENTER)
+        vbox.AddSpacer(30)
+        self.SetSizerAndFit(vbox)
+        self.Centre()
+        self.Show()
+
+    def OnButtonOKClicked(self, event):
+        logging.info("{0}:{1}: user clicked OK".format(self.logprefix, "OnButtonOKClicked"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+
+    def when_closed(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "when_closed"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+
+class InformModifyLaterPopupWindow(wx.Frame):
+    def __init__(self, parent):
+        self.logprefix = "InformModifyLaterPopupWindow"
+        super(InformModifyLaterPopupWindow, self).__init__(parent, size=(300, 160))
+
+    def start(self, ret_list, the_found_status):
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
+        self.Bind(wx.EVT_CLOSE, self.when_closed)
+        self.SetBackgroundColour('WHITE')
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        informStaticText = wx.StaticText(self)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.Add(wx.StaticText(self), label="    ")
+        if the_found_status == found_status.FoundStatus.BOTH_FOUND:
+            found_test_name = ret_list[0][1].keys()[0]
+            informStaticText.SetLabel("\nChanges cannot be saved because the new item already exists in test '" + found_test_name + "'")
+        elif the_found_status == found_status.FoundStatus.DE_FOUND:
+            informStaticText.SetLabel("\nChanges cannot be saved because the German term has been found elsewhere")
+        elif the_found_status == found_status.FoundStatus.EN_FOUND:
+            informStaticText.SetLabel("\nChanges cannot be saved because the English term has been found elsewhere")
+        hbox.Add(informStaticText)
+        hbox.Add(wx.StaticText(self), label="    ")
+        vbox.Add(hbox)
+        vbox.AddSpacer(30)
+        self.button_OK = wx.Button(self, -1, label='OK')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonOKClicked, self.button_OK)
+        vbox.Add(self.button_OK, flag=wx.CENTER)
+        vbox.AddSpacer(30)
+        self.SetSizerAndFit(vbox)
+        self.Centre()
+        self.Show()
+
+    def OnButtonOKClicked(self, event):
+        logging.info("{0}:{1}: user clicked OK".format(self.logprefix, "OnButtonOKClicked"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+
+    def when_closed(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "when_closed"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+
+class EditPreviousPopupWindow(wx.Frame):
+    def __init__(self, parent):
+        self.logprefix = "EditPreviousPopupWindow"
+        super(EditPreviousPopupWindow, self).__init__(parent, size=(300, 160))
+
+    def start(self, questionId, question, answer, parent):
+        logging.info("{0}:{1}: start".format(self.logprefix, "start"))
+        self.Bind(wx.EVT_CLOSE, self.when_closed)
+        self.parent = parent
+        self.questionId = questionId
+        self.SetBackgroundColour('WHITE')
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(2, 4, hgap=20)
+        self.firstEditStaticText = wx.StaticText(self)
+        self.secondEditStaticText = wx.StaticText(self)
+        if self.parent.getDeToEn():
+            self.firstEditStaticText.SetLabel('\nGerman:\n')
+            self.secondEditStaticText.SetLabel('\nEnglish:\n')
+        else:
+            self.firstEditStaticText.SetLabel('\nEnglish:\n')
+            self.secondEditStaticText.SetLabel('\nGerman:\n')
+        grid.Add(wx.StaticText(self, label="   "))
+        grid.Add(self.firstEditStaticText, flag=wx.CENTER)
+        grid.Add(self.secondEditStaticText, flag=wx.CENTER)
+        grid.Add(wx.StaticText(self, label="   "))
+        self.firstEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
+        self.secondEditText = wx.TextCtrl(self, size=(250, 50), style = wx.TE_MULTILINE)
+        self.Bind(wx.EVT_TEXT, self.OnEditTextChanged, self.firstEditText)
+        self.Bind(wx.EVT_TEXT, self.OnEditTextChanged, self.secondEditText)
+        grid.Add(wx.StaticText(self, label="   "))
+        grid.Add(self.firstEditText, flag=wx.CENTER)
+        grid.Add(self.secondEditText, flag=wx.CENTER)
+        grid.Add(wx.StaticText(self, label="   "))
+        self.firstEditText.SetLabel(question)
+        self.secondEditText.SetLabel(answer)
+        vbox.Add(grid)
+        vbox.AddSpacer(30)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_save = wx.Button(self, -1, label='Save')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonSaveClicked, self.button_save)
+        hbox.Add(self.button_save, flag=wx.CENTER)
+        hbox.AddSpacer(30)
+        self.button_cancel = wx.Button(self, -1, label='Cancel')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonCancelClicked, self.button_cancel)
+        hbox.Add(self.button_cancel, flag=wx.CENTER)
+        vbox.Add(hbox, flag=wx.CENTER)
+        vbox.AddSpacer(30)
+        self.button_save.Disable()
+        self.Bind(wx.EVT_TEXT, self.OnEditTextChanged, self.firstEditText)
+        self.Bind(wx.EVT_TEXT, self.OnEditTextChanged, self.secondEditText)
+        self.SetSizerAndFit(vbox)
+        self.Centre()
+        self.Show()
+        
+    def OnEditTextChanged(self, event):
+        self.button_save.Enable()
+        self.Unbind(wx.EVT_TEXT)
+
+    def OnButtonSaveClicked(self, event):
+        logging.info("{0}:{1}: user clicked save".format(self.logprefix, "OnButtonSaveClicked"))
+        ret_list = self.parent.modify_question(self.questionId, self.firstEditText.GetValue(), self.secondEditText.GetValue())
+        the_found_status = ret_list[0][0]
+        logging.info("{0}:{1}: found status: {2}".format(self.logprefix, "OnButtonSaveClicked", the_found_status))
+        if the_found_status == found_status.FoundStatus.NONE_FOUND:
+            self.parent.receive_updated_item(self.firstEditText.GetValue(), self.secondEditText.GetValue())
+            self.Unbind(wx.EVT_CLOSE)
+            self.MakeModal(False)
+            self.Close()
+        else:
+            self.parent.inform_modify_later(ret_list, the_found_status)
+
+    def OnButtonCancelClicked(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "OnButtonCancelClicked"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
+
+    def when_closed(self, event):
+        logging.info("{0}:{1}: user clicked close".format(self.logprefix, "when_closed"))
+        self.Unbind(wx.EVT_CLOSE)
+        self.MakeModal(False)
+        self.Close()
 
 class TestSummaryPopupWindow(wx.Frame):
     def __init__(self, parent):
@@ -52,6 +216,7 @@ class TestFrame(wx.Frame):
     def start(self, test):
         logging.info("{0}:{1}: start".format(self.logprefix, "start"))
         self.test = test
+        self.save_score = True
         self.Bind(wx.EVT_CLOSE, self.when_closed)
         self.SetBackgroundColour('WHITE')
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -149,6 +314,11 @@ class TestFrame(wx.Frame):
         self.test.quit()
         self.Close()
         
+    def update_previous_item(self, question, answer):
+        logging.info("{0}:{1}: answer: {2}, question: {3}".format(self.logprefix, "update_previous_item", answer, question))
+        self.save_score = False
+        self.previousItemText.SetLabel(question + " | " + answer)
+        
     def handle_submitted_answer(self, answer):
         logging.info("{0}:{1}: answer: {2}".format(self.logprefix, "handle_submitted_answer", answer))
         (score, wrong, done, remaining, correct, item) = self.test.update_results(answer)
@@ -184,7 +354,10 @@ class TestFrame(wx.Frame):
             self.secondEditText.Clear()
             self.firstEditText.Disable()
             self.secondEditText.Disable()
-            self.test.test_summary()
+            if self.save_score:
+                self.test.test_summary()
+            else:
+                self.test.inform_no_score_saved()
         
     def get_number_with_padding(self, number):
         if number < 10:
@@ -200,7 +373,7 @@ class TestFrame(wx.Frame):
         self.handle_submitted_answer(answer)
 
     def OnButtonEditClicked(self, event):
-        pass
+        self.test.edit_previous_item()
 
     def OnButtonSubmitClicked(self, event):
         self.handle_submitted_answer(self.secondEditText.GetValue())

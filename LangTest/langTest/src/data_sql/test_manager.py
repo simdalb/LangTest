@@ -150,6 +150,10 @@ class TestManager:
         row = self.cursor.fetchone()
         return row[0]
     
+    def remove_test_stats(self, test_id):
+        self.cursor.execute("DELETE FROM stats WHERE testId = '" + str(test_id) + "'")
+        self.connect.commit()
+    
     def delete_item(self, questionId):
         self.cursor.execute("DELETE FROM testContents WHERE questionId = '" + str(questionId) + "'")
         self.connect.commit()
@@ -177,11 +181,14 @@ class TestManager:
         ret_list = self.check_status(test_id, german_value, english_value)
         if not ret_list:
             found_test_name_to_values = dict()
-            self.cursor.execute("UPDATE testContents SET termLang1 = '" + german_value + "', termLang2 = '" + english_value \
-                                + "' WHERE questionId = '" + str(questionId) + "'")
-            self.connect.commit()
+            self.modify_item(questionId, german_value, english_value)
             ret_list.append((found_status.FoundStatus.NONE_FOUND, found_test_name_to_values, german_value, english_value))
         return ret_list
+    
+    def modify_item(self, questionId, german_value, english_value):
+        self.cursor.execute("UPDATE testContents SET termLang1 = '" + german_value + "', termLang2 = '" + english_value \
+                                + "' WHERE questionId = '" + str(questionId) + "'")
+        self.connect.commit()
 
     def getMatches(self, expr, testId):
         logging.info("{0}:{1}: searching for expression: {2} in testId: {3}".format(self.logprefix, "getMatches", expr, testId))

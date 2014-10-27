@@ -3,6 +3,7 @@ from logic import login
 from logic import testSelection
 from logic import editTest
 from logic import test
+from common import dated_score_handler
 import logging
 import sys
 
@@ -14,6 +15,7 @@ class Manager:
         logging.info("{0}:{1}: start".format(self.logprefix, "__init__"))
         self.data_manager = data_manager
         self.UI_factory = UI_factory
+        self.dated_score_handler = dated_score_handler.DatedScoreHandler()
     
     def do_login(self):
         logging.info("{0}:{1}:".format(self.logprefix, "do_login"))
@@ -33,7 +35,8 @@ class Manager:
                                                        self.UI_factory, 
                                                        self.data_manager.get_data_factory().get_test_manager(),
                                                        self.user_name,
-                                                       self.user_id,)
+                                                       self.user_id,
+                                                       self.dated_score_handler)
         theTestSelection.start()
 
     def do_edit_test(self, test_name, test_id):
@@ -57,7 +60,8 @@ class Manager:
                             self.user_name,
                             self.user_id,
                             self.test_name,
-                            self.test_id)
+                            self.test_id,
+                            self.dated_score_handler)
         theTest.start()
 
     def quit(self):

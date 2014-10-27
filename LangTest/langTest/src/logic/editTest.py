@@ -59,6 +59,7 @@ class EditTest:
             if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
                 self.testList.append([self.test_manager.get_question_id(firstAppendTextValue, secondAppendTextValue), 
                                       firstAppendTextValue, secondAppendTextValue])
+                self.test_manager.remove_test_stats(self.test_id)
             return ret_list
         else:
             logging.info("{0}:{1}: appending en to de".format(self.logprefix, "append_item"))
@@ -66,17 +67,20 @@ class EditTest:
             if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
                 self.testList.append([self.test_manager.get_question_id(secondAppendTextValue, firstAppendTextValue), 
                                       secondAppendTextValue, firstAppendTextValue])
+                self.test_manager.remove_test_stats(self.test_id)
             return ret_list
-        
+
     def modify_question(self, firstTextValue, secondTextValue):
         if self.getDeToEn():
             ret_list = self.test_manager.modify_question(self.test_id, self.questionId, firstTextValue, secondTextValue)
             if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
                 self.testList[self.itemNumber - 1] = (self.questionId, firstTextValue, secondTextValue)
+                self.test_manager.remove_test_stats(self.test_id)
         else:
             ret_list = self.test_manager.modify_question(self.test_id, self.questionId, secondTextValue, firstTextValue)
             if ret_list[0][0] == found_status.FoundStatus.NONE_FOUND:
                 self.testList[self.itemNumber - 1] = (self.questionId, secondTextValue, firstTextValue)
+                self.test_manager.remove_test_stats(self.test_id)
         return ret_list
 
     def append_item_to_other_test(self, test_name, german_value, english_value):
@@ -89,6 +93,7 @@ class EditTest:
     
     def move_item_to_other_test(self, test_id):
         self.test_manager.move_item(self.questionId, test_id)
+        self.test_manager.remove_test_stats(test_id)
         theItemListBoundsStatus = self.delete_current_stored_item()
         self.edit_test_UI.setNewEditTextAfterDelete(theItemListBoundsStatus)
         
@@ -108,6 +113,7 @@ class EditTest:
     def delete_current_item(self):
         logging.info("{0}:{1}: deleting item number {2}".format(self.logprefix, "delete_current_item", self.itemNumber))
         self.test_manager.delete_item(self.questionId)
+        self.test_manager.remove_test_stats(self.test_id)
         theItemListBoundsStatus = self.delete_current_stored_item()
         self.edit_test_UI.setNewEditTextAfterDelete(theItemListBoundsStatus)
         
@@ -157,6 +163,7 @@ class EditTest:
         
     def delete_test(self):
         self.test_manager.delete_test(self.test_id)
+        self.test_manager.remove_test_stats(self.test_id)
         self.edit_test_UI.goBackToTestSelection()
         
     def import_test(self):

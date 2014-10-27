@@ -509,14 +509,14 @@ class EditTestFrame(wx.Frame):
         vbox.Add(grid2, flag=wx.CENTER)
         vbox.Add(wx.StaticText(self, label='\nMultiple item operations:\n'), flag=wx.CENTER)
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        button_import = wx.Button(self, -1, 'Import from file')
-        self.Bind(wx.EVT_BUTTON, self.OnButtonImportClicked, button_import)
+        self.button_import = wx.Button(self, -1, 'Import from file')
+        self.Bind(wx.EVT_BUTTON, self.OnButtonImportClicked, self.button_import)
         self.button_export = wx.Button(self, -1, 'Export to file')
         self.Bind(wx.EVT_BUTTON, self.OnButtonExportClicked, self.button_export)
         button_delete = wx.Button(self, -1, 'Delete test')
         self.Bind(wx.EVT_BUTTON, self.OnButtonDeleteTestClicked, button_delete)
         hbox2.Add((340,-1))
-        hbox2.Add(button_import, flag=wx.CENTER)
+        hbox2.Add(self.button_import, flag=wx.CENTER)
         hbox2.Add((30,-1))
         hbox2.Add(self.button_export, flag=wx.CENTER)
         hbox2.Add((30,-1))
@@ -556,10 +556,20 @@ class EditTestFrame(wx.Frame):
             self.button_export.Disable()
             self.button_start_test.Disable()
             self.fully_enabled = False
+        if self.editTest.getNumberOfItems():
+            self.button_import.Disable()
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show()
         
+    def disenable_imexport(self):
+        if self.editTest.getNumberOfItems():
+            self.button_import.Disable()
+            self.button_export.Enable()
+        else:
+            self.button_import.Enable()
+            self.button_export.Disable()
+            
     def OnButtonStartTestClicked(self, event):
         self.Unbind(wx.EVT_CLOSE)
         self.Hide()
@@ -570,6 +580,7 @@ class EditTestFrame(wx.Frame):
         self.editTest.move_current_item()
         logging.info("{0}:{1}: number of items is now: {2}".format(self.logprefix, "OnButtonMoveItemClicked", self.editTest.getNumberOfItems()))
         self.setNumberItemsText()
+        self.disenable_imexport()
         
     def OnButtonDeleteItemClicked(self, event):
         self.editTest.delete_current_item()
@@ -577,6 +588,7 @@ class EditTestFrame(wx.Frame):
             self.input_search_term.Disable()
             self.button_search.Disable()
         self.setNumberItemsText()
+        self.disenable_imexport()
         
     def OnEditTextChanged(self, event):
         if not self.ignore_edit_text_changed == 0:
@@ -658,6 +670,7 @@ class EditTestFrame(wx.Frame):
         path = self.editTest.export_test()
         logging.info("{0}:{1}: user entered path: {2}".format(self.logprefix, "OnButtonExportClicked", path))
         self.editTest.write_to_file(path)
+        self.disenable_imexport()
         
     def OnButtonImportClicked(self, event):
         path = self.editTest.import_test()
@@ -667,6 +680,7 @@ class EditTestFrame(wx.Frame):
             self.input_search_term.Enable()
             self.button_search.Enable()
         self.setNumberItemsText()
+        self.disenable_imexport()
         
     def OnButtonDeleteTestClicked(self, event):
         self.editTest.prompt_delete_test()
@@ -697,6 +711,7 @@ class EditTestFrame(wx.Frame):
         if self.editTest.getNumberOfItems() > 0:
             self.input_search_term.Enable()
             self.button_search.Enable()
+        self.disenable_imexport()
             
     def process_ret_list(self, ret_list):
         the_found_status = ret_list[0][0]
@@ -709,6 +724,7 @@ class EditTestFrame(wx.Frame):
                 self.editTest.inform_item_exists(found_test_name, ret_list[0][3], ret_list[0][2])
         else:
             self.editTest.select_other_test(ret_list)
+        self.disenable_imexport()
             
     def setNumberItemsText(self):
         if self.editTest.getItemNumber() > 0 and self.editTest.getNumberOfItems() > 0:

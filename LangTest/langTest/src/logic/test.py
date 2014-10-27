@@ -1,10 +1,9 @@
 
 import logging
 import random
-from datetime import datetime
 
 class Test:
-    def __init__(self, manager, UI_factory, test_manager, persistency_manager, user_name, user_id, test_name, test_id):
+    def __init__(self, manager, UI_factory, test_manager, persistency_manager, user_name, user_id, test_name, test_id, dated_score_handler):
         self.logprefix = "TestSelection"
         logging.info("{0}:{1}:".format(self.logprefix, "__init__"))
         self.manager = manager
@@ -16,6 +15,7 @@ class Test:
         self.user_id = user_id
         self.test_name = test_name
         self.test_id = test_id
+        self.dated_score_handler = dated_score_handler
         self.test_list = []
         self.wrong_results = []
         self.itemNumber = -1
@@ -24,6 +24,7 @@ class Test:
         self.answer = ""
         self.score = 0
         self.multi_answer_list = dict()
+        self.save_score = False
         
     def start(self):
         self.test_UI.start(self)
@@ -63,16 +64,45 @@ class Test:
         except:
             pass
         return (self.question, previous_answers)
-    
+
     def getAnswer(self):
         return self.answer
-    
+
     def wrong_items(self):
         return self.wrong_results
-    
+
     def test_summary(self):
         self.UI_factory.create_TestSummaryPopupWindow(self.test_UI).start(self.score, self.getNumberOfItems(), self)
+
+    def edit_previous_item(self):
+        question = ""
+        answer = ""
+        questionId = self.test_list[self.itemNumber - 1][0]
+        if self.getDeToEn():
+            question = self.test_list[self.itemNumber - 1][1]
+            answer = self.test_list[self.itemNumber - 1][2]
+        else:
+            question = self.test_list[self.itemNumber - 1][2]
+            answer = self.test_list[self.itemNumber - 1][1]
+        self.UI_factory.create_EditPreviousPopupWindow(self.test_UI).start(questionId, question, answer, self)
+
+    def modify_question(self, questionId, firstTextValue, secondTextValue):
+        if self.getDeToEn():
+            ret_list = self.test_manager.modify_question(self.test_id, questionId, firstTextValue, secondTextValue)
+        else:
+            ret_list = self.test_manager.modify_question(self.test_id, questionId, secondTextValue, firstTextValue)
+        return ret_list
+    
+    def inform_modify_later(self, ret_list, the_found_status):
+        self.UI_factory.create_InformModifyLaterPopupWindow(self.test_UI).start(ret_list, the_found_status)
         
+    def inform_no_score_saved(self):
+        self.UI_factory.create_InformNoScoreSavedPopupWindow(self.test_UI).start()
+
+    def receive_updated_item(self, question, answer):
+        self.test_manager.remove_test_stats(self.test_id)
+        self.test_UI.update_previous_item(question, answer)
+
     def find_answer_elsewhere(self, given_answer):
         logging.info("{0}:{1}: searching for question: {2}, answer: {3}".format(self.logprefix, "find_answer_elsewhere", self.question, given_answer))
         for i in range(self.itemNumber+1,len(self.test_list)):
@@ -104,7 +134,7 @@ class Test:
                 logging.info("{0}:{1}: correct answer not already given. Confirm question: {2}, answer: {3}".format(self.logprefix, "find_answer_elsewhere", self.question, self.answer))
                 return True
         return False
-    
+
     def update_results(self, answer):
         logging.info("{0}:{1}: user answer: {2}, correct answer: {3}".format(self.logprefix, "update_results", answer, self.answer))
         logging.info("{0}:{1}: old item list:".format(self.logprefix, "update_results"))
@@ -136,9 +166,9 @@ class Test:
         item = self.question + " | " + self.answer
         logging.info("{0}:{1}: correct: {2}".format(self.logprefix, "update_results", correct))
         if remaining == 0:
-            self.test_manager.write_test_resuts(self.user_id, self.test_id, datetime.strftime(datetime.utcnow(), "%b %d %Y %H:%M:%S"), self.score)
+            self.test_manager.write_test_resuts(self.user_id, self.test_id, self.dated_score_handler.getNowText(), self.score)
         return (self.score, wrong, done, remaining, correct, item)
-    
+
     def back_to_edit_test(self):
         self.manager.do_edit_test(self.test_name, self.test_id)
     

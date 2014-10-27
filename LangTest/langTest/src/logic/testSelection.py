@@ -1,10 +1,8 @@
 
 import logging
-from datetime import datetime
-from datetime import timedelta
 
 class TestSelection:
-    def __init__(self, manager, UI_factory, test_manager, user_name, user_id):
+    def __init__(self, manager, UI_factory, test_manager, user_name, user_id, dated_score_handler):
         self.logprefix = "TestSelection"
         logging.info("{0}:{1}:".format(self.logprefix, "__init__"))
         self.manager = manager
@@ -13,6 +11,7 @@ class TestSelection:
         self.test_manager = test_manager
         self.user_name = user_name
         self.user_id = user_id
+        self.dated_score_handler = dated_score_handler
         
     def start(self):
         self.test_selection_UI.start(self)
@@ -30,50 +29,9 @@ class TestSelection:
     
     def get_tests(self):
         test_list = self.test_manager.get_tests(self.user_id)
-        test_list.sort(key=lambda(test):self.effective_score(test))
+        test_list.sort(key=lambda(test):self.dated_score_handler.effective_score(test[3], test[4], test[2]))
         return test_list
 
-    def recommendedTest(self, test1, test2):
-        eff_score1 = self.effective_score(test1)
-        eff_score2 = self.effective_score(test2)
-        if eff_score1 < eff_score2:
-            return 1
-        elif eff_score1 == eff_score2:
-            return 0
-        else:
-            return -1
-
-    def effective_score(self, test):
-        total = test[3]
-        score_timestamp_list = test[4]
-        creation_time = datetime.strptime(test[2], "%b %d %Y %H:%M:%S")
-        most_recent_timestamp = creation_time
-        one_week = datetime.strptime("Jan 01 2014 12:00:00", "%b %d %Y %H:%M:%S") - datetime.strptime("Jan 08 2014 12:00:00", "%b %d %Y %H:%M:%S")
-        time_since_last_test = one_week
-        score = 0
-        score_frac = float(score) / float(total)
-        timestamp_now = datetime.utcnow()
-        pre_effective_score = 0
-        if score_timestamp_list:
-            most_recent_score_timestamp = score_timestamp_list[0]
-            most_recent_timestamp = datetime.strptime(most_recent_score_timestamp[1], "%b %d %Y %H:%M:%S")
-            logging.info("{0}:{1}: most recent timestamp: {2}".format(self.logprefix, "effective_score", most_recent_timestamp))
-            for score_timestamp in score_timestamp_list:
-                timestamp = datetime.strptime(score_timestamp[1], "%b %d %Y %H:%M:%S")
-                logging.info("{0}:{1}: timestamp: {2}".format(self.logprefix, "effective_score", timestamp))
-                if  timestamp > most_recent_timestamp:
-                    most_recent_score_timestamp = score_timestamp
-                    most_recent_timestamp = timestamp
-            score = most_recent_score_timestamp[0] / float(total)
-            timestamp = most_recent_score_timestamp[1]
-            time_since_last_test = datetime.utcnow() - datetime.strptime(timestamp, "%b %d %Y %H:%M:%S")
-            pre_effective_score = max(0, score_frac - 0.05 * float(time_since_last_test.total_seconds()) / float(one_week.total_seconds()))
-        time_since_created = timestamp_now - creation_time
-        time_of_zero_pre_effective_score = most_recent_timestamp + timedelta(seconds=int(score_frac * 20 * one_week.total_seconds()))
-        time_since_zero_pre_effective_score = timestamp_now - time_of_zero_pre_effective_score
-        return pre_effective_score - (0 if score_timestamp_list else time_since_created.seconds) \
-                                   - (time_since_zero_pre_effective_score.seconds if score_timestamp_list and pre_effective_score == 0 else 0)
-    
     def inform_test_exists(self, test_name):
         self.UI_factory.create_InformTestExistsPopupWindow(self.test_selection_UI).start(test_name)
     
@@ -86,7 +44,7 @@ class TestSelection:
     def create_test(self, test_name):
         logging.info("{0}:{1}: creating test: {2}".format(self.logprefix, "create_test", test_name))
         self.test_selection_UI.finish()
-        test_id = self.test_manager.create_test(test_name, datetime.strftime(datetime.utcnow(), "%b %d %Y %H:%M:%S"))
+        test_id = self.test_manager.create_test(test_name, self.dated_score_handler.getNowText())
         self.manager.do_edit_test(test_name, test_id)
 
     def prompt_new_test(self, test_name):
